@@ -1,0 +1,12 @@
+package com.projet.housing.controller;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/security")
+@CrossOrigin
+public class MemberController {
+    
+}
