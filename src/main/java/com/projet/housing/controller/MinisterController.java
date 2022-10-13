@@ -26,7 +26,7 @@ import com.projet.housing.model.Minister;
 import com.projet.housing.service.MinisterService;
 
 @RestController
-@RequestMapping("/api/security")
+@RequestMapping("/api/minister")
 @CrossOrigin
 public class MinisterController {
     @Autowired
