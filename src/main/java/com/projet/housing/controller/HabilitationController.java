@@ -5,8 +5,11 @@
  */
 package com.projet.housing.controller;
 
+import com.projet.housing.db.ProfileRepository;
+import com.projet.housing.dto.CheckAuthorityDTO;
 import com.projet.housing.dto.HabilitationDTO;
 import com.projet.housing.dto.PermissionDTO;
+import com.projet.housing.model.Permission;
 import com.projet.housing.model.Profile;
 import com.projet.housing.service.MenuService;
 import com.projet.housing.service.PermissionService;
@@ -115,5 +118,26 @@ public class HabilitationController {
             profileService.saveProfile(currentProfile);
         }
         return ResponseEntity.ok(h);
+    }
+
+    /**
+     * vérification de l'habilitation
+     * @param h
+     * @return
+     */
+    @PostMapping("/verifier-habilitation")
+    public ResponseEntity<?> checkAuthority(@RequestBody CheckAuthorityDTO h) {
+        Map<String, Object> check = new HashMap<>();
+        Optional<Profile> p = profileService.getProfile(h.getProfile());
+        Optional<Permission> pm = permissionService.getPermission(h.getPermission());
+        if(p.isPresent()){
+            if(p.get().getPermissions().contains(pm.get())){
+                check.put("authorize", true);
+                return ResponseEntity.ok(check);
+            }
+        }
+        
+        check.put("authorize", false);
+        return ResponseEntity.ok(check);
     }
 }
