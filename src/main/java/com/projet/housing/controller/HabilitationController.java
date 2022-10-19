@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -129,7 +130,7 @@ public class HabilitationController {
     public ResponseEntity<?> checkAuthority(@RequestBody CheckAuthorityDTO h) {
         Map<String, Object> check = new HashMap<>();
         Optional<Profile> p = profileService.getProfile(h.getProfile());
-        Optional<Permission> pm = permissionService.getPermission(h.getPermission());
+        Optional<Permission> pm = permissionService.getPermissionByCode(h.getPermission());
         if(p.isPresent()){
             if(p.get().getPermissions().contains(pm.get())){
                 check.put("authorize", true);

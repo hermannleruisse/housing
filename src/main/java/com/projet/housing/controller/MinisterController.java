@@ -9,6 +9,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +27,8 @@ import com.projet.housing.model.Minister;
 import com.projet.housing.service.MinisterService;
 
 @RestController
-@RequestMapping("/api/minister")
+@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+@RequestMapping("/api/manager")
 @CrossOrigin
 public class MinisterController {
     @Autowired
@@ -44,6 +46,7 @@ public class MinisterController {
      * @param minister An object minister
      * @return The minister object saved
      */
+    @PreAuthorize("hasAuthority('PM_ADD_MI')")
     @PostMapping("/save-minister")
     public Object createMinister(@Valid @RequestBody Minister minister) {
         Optional<Minister> p = this.ministerRepository.checkIfMinisterExistByCode(minister.getCode());
@@ -88,6 +91,7 @@ public class MinisterController {
      * @param minister - The minister object updated
      * @return
      */
+    @PreAuthorize("hasAuthority('PM_EDI_MI')")
     @PutMapping("/edit-minister/{id}")
     public Minister updateMinister(@PathVariable("id") final String id, @Valid @RequestBody MinisterDTO minister) {
         Optional<Minister> e = ministerService.getMinister(id);
@@ -119,6 +123,7 @@ public class MinisterController {
      *
      * @param id - The id of the minister to delete
      */
+    @PreAuthorize("hasAuthority('PM_DEL_MI')")
     @DeleteMapping("/delete-minister/{id}")
     public void deleteMinister(@PathVariable("id") final String id) {
         ministerService.deleteMinister(id);
