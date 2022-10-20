@@ -28,4 +28,8 @@ public class PermissionService {
     public Iterable<Permission> getPermissions() {
         return permissionRepository.findAll();
     }
+
+    public Optional<Permission> getPermissionByCode(final String code) {
+        return permissionRepository.checkIfPermissionExistByCode(code);
+    }
 }

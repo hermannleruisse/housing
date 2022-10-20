@@ -10,6 +10,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +29,8 @@ import com.projet.housing.service.MemberService;
 
 
 @RestController
-@RequestMapping("/api/security")
+@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+@RequestMapping("/api/manager")
 @CrossOrigin
 public class MemberController {
     @Autowired
@@ -51,6 +53,7 @@ public class MemberController {
      * @param member An object member
      * @return The member object saved
      */
+    @PreAuthorize("hasAuthority('PM_ADD_ME')")
     @PostMapping("/save-member")
     public Object createMember(@Valid @RequestBody MemberDTO member) {
         Optional<Member> us = mRepository.checkIfMemberExistByNomAndPrenom(member.getNom(), member.getPrenom());
@@ -96,6 +99,7 @@ public class MemberController {
      * @param member - The member object updated
      * @return
      */
+    @PreAuthorize("hasAuthority('PM_EDI_ME')")
     @PutMapping("/edit-member/{id}")
     public Member updateMember(@PathVariable("id") final String id, @Valid @RequestBody MemberDTO member) {
         Optional<Member> e = memberService.getMember(id);
@@ -143,7 +147,8 @@ public class MemberController {
      *
      * @param id - The id of the member to delete
      */
-    @DeleteMapping("/member/{id}")
+    @PreAuthorize("hasAuthority('PM_DEL_ME')")
+    @DeleteMapping("/delete-member/{id}")
     public void deleteMember(@PathVariable("id") final String id) {
         memberService.deleteMember(id);
     }

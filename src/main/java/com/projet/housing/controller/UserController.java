@@ -147,7 +147,7 @@ public class UserController {
      *
      * @param id - The id of the user to delete
      */
-    @DeleteMapping("/user/{id}")
+    @DeleteMapping("/delete-user/{id}")
     public void deleteUser(@PathVariable("id") final String id) {
         userService.deleteUser(id);
     }
