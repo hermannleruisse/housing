@@ -42,11 +42,6 @@ public class MemberController {
     @Autowired
     private Environment environment;
 
-    @RequestMapping("/liste-des-membres")
-    public List<Member> listUtilisateur() {
-        return this.mRepository.findAll();
-    }
-
     /**
      * Create - Add a new member
      *
