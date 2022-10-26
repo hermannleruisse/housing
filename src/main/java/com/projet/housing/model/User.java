@@ -23,11 +23,11 @@ import org.hibernate.annotations.GenericGenerator;
  * @author lerusse
  */
 @Entity
-//@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"username"})})
 public class User implements Serializable{
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Column(nullable = false, length = 50)
     private String id;
     
     @Column(nullable = false, unique = true)
@@ -38,23 +38,28 @@ public class User implements Serializable{
     @NotBlank(message = "Le mot de passe des obligatoire")
     private String password;
     
+    @Column(nullable = false)
     private int active;
     
     @ManyToOne
     @JoinColumn(name = "profile_id", nullable = false)
     @NotNull(message = "Le profile est obligatoire")
     private Profile profile;
-
-    private String token;
     
     public User(String username, String password, Profile profile) {
         this.username = username;
         this.password = password;
-        this.active = 1;
         this.profile = profile;
     }
 
-    protected User() {
+    public User(String username, String password, int active, Profile profile) {
+        this.username = username;
+        this.password = password;
+        this.active = active;
+        this.profile = profile;
+    }
+
+    public User() {
     }
 
     public String getId() {
@@ -119,4 +124,12 @@ public class User implements Serializable{
         }
         return new ArrayList<>();
     }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
+
 }

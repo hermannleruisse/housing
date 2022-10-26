@@ -21,4 +21,7 @@ public interface UserRepository extends JpaRepository<User, String>{
     
     @Query(value = "SELECT * FROM user u WHERE u.username = ?1", nativeQuery = true)
     Optional<User> checkIfUserExistByUsername(String username);
+
+    @Query(value = "INSERT INTO user(active, password, profile_id, username) values (?1, ?2, ?3, ?4)", nativeQuery = true)
+    void addUser(int active, String password, String profileId, String username);
 }

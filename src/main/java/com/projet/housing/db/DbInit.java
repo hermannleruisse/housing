@@ -9,8 +9,11 @@ import com.projet.housing.model.Menu;
 import com.projet.housing.model.Permission;
 import com.projet.housing.model.Profile;
 import com.projet.housing.model.User;
+
 import java.util.Arrays;
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class DbInit implements CommandLineRunner {
     private ProfileRepository profileRepository;
     private PermissionRepository permissionRepository;
     private MenuRepository menuRepository;
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     public DbInit(UserRepository userRepository, PasswordEncoder passwordEncoder, ProfileRepository profileRepository, 
@@ -39,10 +43,10 @@ public class DbInit implements CommandLineRunner {
     @Override
     public void run(String... args) {
         //delete all
-        this.permissionRepository.deleteAll();
-        this.menuRepository.deleteAll();
-        this.userRepository.deleteAll();
-        this.profileRepository.deleteAll();
+        // this.permissionRepository.deleteAll();
+        // this.menuRepository.deleteAll();
+        // this.userRepository.deleteAll();
+        // this.profileRepository.deleteAll();
         
         Profile p1 = new Profile("ADMIN", "ADMIN", "Administrateur du system");
         Profile p2 = new Profile("MANAGER", "MANAGER", "Manager du system");
@@ -82,13 +86,26 @@ public class DbInit implements CommandLineRunner {
         pm13, pm14, pm15, pm16);
 
         this.permissionRepository.saveAll(permissions);
+        String pass = passwordEncoder.encode("admin123");
+
+        // User admin = new User("admin", "admin123", p1);
+        User u1 = new User();
+        u1.setActive(1);
+        u1.setUsername("admin");
+        u1.setPassword(pass);
+        u1.setProfile(p1);
+
+        User u2 = new User();
+        u2.setActive(1);
+        u2.setUsername("manager");
+        u2.setPassword(pass);
+        u2.setProfile(p1);
+
+        // User manager = new User("manager", "manager123", p2);
         
-        User admin = new User("admin", passwordEncoder.encode("admin123"), p1);
-        User manager = new User("manager", passwordEncoder.encode("manager123"), p2);
-//        User admin = new User("admin", passwordEncoder.encode("admin123"), "ADMIN", "ACCESS_1, ACCESS_2");
-//        User manager = new User("manager", passwordEncoder.encode("manager123"), "MANAGER", "ACCESS_1");
-        
-        List<User> users = Arrays.asList(admin, manager);
+        List<User> users = Arrays.asList(u1, u2);
+        // this.userRepository.addUser(1, pass, p1.getId(), "admin");
+        // this.userRepository.addUser(1, pass, p2.getId(), "manager");
         this.userRepository.saveAll(users);
     }
 }
