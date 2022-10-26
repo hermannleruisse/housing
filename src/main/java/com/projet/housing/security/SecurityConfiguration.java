@@ -17,9 +17,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
-import org.springframework.security.web.header.writers.StaticHeadersWriter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  *
@@ -49,12 +46,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
     
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        //heroku
-        http.requiresChannel()
-        .requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
-        .requiresSecure().and()
         //cors
-        .cors().and()
+        http.cors().and()
                 //remove csrf and state in session because in jwt we do not need them
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
