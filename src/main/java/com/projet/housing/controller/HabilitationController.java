@@ -5,7 +5,6 @@
  */
 package com.projet.housing.controller;
 
-import com.projet.housing.db.ProfileRepository;
 import com.projet.housing.dto.CheckAuthorityDTO;
 import com.projet.housing.dto.HabilitationDTO;
 import com.projet.housing.dto.PermissionDTO;
@@ -23,7 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

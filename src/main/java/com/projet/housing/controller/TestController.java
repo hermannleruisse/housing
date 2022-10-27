@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
  * @author lerusse
  */
 @RestController
-@RequestMapping("/api/manager")
+@RequestMapping("/")
 public class TestController {
-    @RequestMapping("/test")
+    @RequestMapping("test")
     public ResponseEntity<?> getUser(){
         Map<String, Object> user = new HashMap<>();
         user.put("name", "toto");

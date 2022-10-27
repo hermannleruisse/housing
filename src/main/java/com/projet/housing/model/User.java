@@ -14,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
@@ -23,6 +24,7 @@ import org.hibernate.annotations.GenericGenerator;
  * @author lerusse
  */
 @Entity
+@Table(name = "APP_USER")
 public class User implements Serializable{
     @Id
     @GeneratedValue(generator = "uuid")
@@ -39,7 +41,9 @@ public class User implements Serializable{
     private String password;
     
     @Column(nullable = false)
-    private int active;
+    private int active = 1;
+
+    private String token;
     
     @ManyToOne
     @JoinColumn(name = "profile_id", nullable = false)
@@ -52,11 +56,12 @@ public class User implements Serializable{
         this.profile = profile;
     }
 
-    public User(String username, String password, int active, Profile profile) {
+    public User(String username, String password, int active, Profile profile, String token) {
         this.username = username;
         this.password = password;
         this.active = active;
         this.profile = profile;
+        this.token = token;
     }
 
     public User() {
@@ -98,7 +103,13 @@ public class User implements Serializable{
         this.profile = profile;
     }
 
-    
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
 //    public List<String> getRoleList() {
 //        if (this.roles.length() > 0) {

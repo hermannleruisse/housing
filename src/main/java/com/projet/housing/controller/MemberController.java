@@ -29,7 +29,7 @@ import com.projet.housing.service.MemberService;
 
 
 @RestController
-@PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
 @RequestMapping("/api/manager")
 @CrossOrigin
 public class MemberController {
