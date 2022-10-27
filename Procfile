@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT -jar target/springboot-crew-api-0.0.1-SNAPSHOT.jar
+web: java -Dserver.port=$PORT -jar target/housing-0.0.1-SNAPSHOT.war
