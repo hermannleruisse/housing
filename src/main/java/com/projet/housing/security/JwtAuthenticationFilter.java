@@ -45,23 +45,25 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         //Grab credential and map them to loginViewModel
-        LoginViewModel credentials = null;
+        LoginViewModel credentials;
         try {
             credentials = new ObjectMapper().readValue(request.getInputStream(), LoginViewModel.class);
-        } catch (IOException ex) {
-            Logger.getLogger(JwtAuthenticationFilter.class.getName()).log(Level.SEVERE, null, ex);
-            ex.printStackTrace();
-        }
-        
-        //Create login token
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                credentials.getUsername(), 
-                credentials.getPassword(), 
-                new ArrayList<>()
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+            credentials.getUsername(),
+            credentials.getPassword(),
+            new ArrayList<>()
         );
         //Authenticate user
         Authentication auth = authenticationManager.authenticate(authenticationToken);
         return auth;
+        } catch (IOException ex) {
+            Logger.getLogger(JwtAuthenticationFilter.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
+            return null;
+        }
+        
+        //Create login token
+        
     }
 
 

@@ -5,17 +5,13 @@
  */
 package com.projet.housing.security;
 
-import org.springframework.beans.factory.annotation.Value;
-
 /**
  *
  * @author lerusse
  */
 public class JwtProperties {
-    @Value("${spring.custom.secret:hermann}")
-    public static String SECRET;
-    @Value("${spring.custom.expiration:864000000}")
-    public static int EXPIRATION_TIME; //10 jours
+    public static final String SECRET = "hermann";
+    public static final int EXPIRATION_TIME = 90000; //10 jours
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String HEADER_STRING = "Authorization";
 }
