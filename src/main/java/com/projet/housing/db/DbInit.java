@@ -87,8 +87,8 @@ public class DbInit implements CommandLineRunner {
 
         this.permissionRepository.saveAll(permissions);
 
-        User admin = new User("admin", passwordEncoder.encode("admin123"), p1);
-        User manager = new User("manager", passwordEncoder.encode("manager123"), p2);
+        User admin = new User("admin", "admin", "admin", passwordEncoder.encode("admin123"), p1);
+        User manager = new User("manager", "manager","manager", passwordEncoder.encode("manager123"), p2);
         
         List<User> users = Arrays.asList(admin, manager);
         this.userRepository.saveAll(users);

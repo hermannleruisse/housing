@@ -73,10 +73,11 @@ public class UserController {
             final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
                     environment.getProperty("unique.username"), environment.getProperty("unique.username"));
             return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-        } else {
+        } 
+        else {
             Optional<Profile> profile = profileService.getProfile(user.getProfile());
             if (profile.isPresent()) {
-                User u = new User(user.getUsername(), passwordEncoder.encode(user.getPassword()), profile.get());
+                User u = new User(user.getNom(), user.getPrenom(), user.getUsername(), passwordEncoder.encode(user.getPassword()), profile.get());
                 return userService.saveUser(u);
             }
         }

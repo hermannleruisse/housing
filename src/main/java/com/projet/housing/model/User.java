@@ -31,32 +31,54 @@ public class User implements Serializable{
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(nullable = false, length = 50)
     private String id;
+
+    @Column(nullable = false)
+    @NotBlank(message = "Le nom est obligatoire")
+    private String nom;
+
+    @Column(nullable = false)
+    @NotBlank(message = "Le prénom est obligatoire")
+    private String prenom;
     
     @Column(nullable = false, unique = true)
     @NotBlank(message = "Le nom d'utilisateur est obligatoire")
     private String username;
     
     @Column(nullable = false)
-    @NotBlank(message = "Le mot de passe des obligatoire")
+    @NotBlank(message = "Le mot de passe est obligatoire")
     private String password;
     
     @Column(nullable = false)
     private int active = 1;
 
     private String token;
+
+    private String photo;
     
     @ManyToOne
     @JoinColumn(name = "profile_id", nullable = false)
     @NotNull(message = "Le profile est obligatoire")
     private Profile profile;
     
-    public User(String username, String password, Profile profile) {
+    public User(String nom, String prenom, String username, String password, Profile profile) {
+        this.nom = nom;
+        this.prenom = prenom;
         this.username = username;
         this.password = password;
         this.profile = profile;
     }
 
     public User(String username, String password, int active, Profile profile, String token) {
+        this.username = username;
+        this.password = password;
+        this.active = active;
+        this.profile = profile;
+        this.token = token;
+    }
+
+    public User(String nom, String prenom, String username, String password, int active, Profile profile, String token) {
+        this.nom = nom;
+        this.prenom = prenom;
         this.username = username;
         this.password = password;
         this.active = active;
@@ -109,6 +131,14 @@ public class User implements Serializable{
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
 //    public List<String> getRoleList() {
