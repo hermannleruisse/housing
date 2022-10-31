@@ -30,6 +30,9 @@ public class UserDTO {
 //    @NotNull(message = "Le profile est requis")
     @NotEmpty(message = "Le profile est obligatoire")
     private String profile;
+    
+    public UserDTO() {
+    }
 
     public UserDTO(String username, String password, String profile) {
         this.username = username;
