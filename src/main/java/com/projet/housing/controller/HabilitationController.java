@@ -64,7 +64,7 @@ public class HabilitationController {
             permissionService.getPermissions().forEach(p -> {
                 if (m.equals(p.getMenu())) {
                     if (profileId == null) {
-                        listP.add(new PermissionDTO(p.getId(), p.getCode(), Boolean.FALSE));
+                        listP.add(new PermissionDTO(p.getId(), p.getCode(), p.getLibelle(), Boolean.FALSE));
                     } else {
                         Optional<Profile> prof = profileService.getProfile(profileId);
                         if (prof.isPresent()) {
@@ -72,16 +72,16 @@ public class HabilitationController {
                             Profile currentProfile = prof.get();
                             if (!currentProfile.getPermissions().isEmpty()) {
                                 currentProfile.getPermissions().forEach(x -> {
-                                    listP.add(new PermissionDTO(x.getId(), x.getCode(), Boolean.TRUE));
+                                    listP.add(new PermissionDTO(x.getId(), x.getCode(), p.getLibelle(), Boolean.TRUE));
                                 });
                             }else{
-                                listP.add(new PermissionDTO(p.getId(), p.getCode(), Boolean.FALSE));
+                                listP.add(new PermissionDTO(p.getId(), p.getCode(), p.getLibelle(), Boolean.FALSE));
                             }
                         }
                     }
-                    habilitation.put("permission", listP);
+                    habilitation.put("permissions", listP);
                 } else {
-                    habilitation.put("permission", listP);
+                    habilitation.put("permissions", listP);
                 }
             });
             habilitation.put("menu", m.getLibelle());

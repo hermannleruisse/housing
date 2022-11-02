@@ -12,6 +12,7 @@ package com.projet.housing.dto;
 public class PermissionDTO {
     private String id;
     private String code;
+    private String libelle;
     private Boolean checked;
 
     public PermissionDTO(String id, String code, Boolean checked) {
@@ -20,7 +21,12 @@ public class PermissionDTO {
         this.checked = checked;
     }
     
-    
+    public PermissionDTO(String id, String code, String libelle, Boolean checked) {
+        this.id = id;
+        this.code = code;
+        this.libelle = libelle;
+        this.checked = checked;
+    }
     
     public PermissionDTO() {
     }
@@ -39,6 +45,14 @@ public class PermissionDTO {
 
     public void setCode(String code) {
         this.code = code;
+    }
+
+    public String getLibelle() {
+        return libelle;
+    }
+
+    public void setLibelle(String libelle) {
+        this.libelle = libelle;
     }
 
     public Boolean getChecked() {
