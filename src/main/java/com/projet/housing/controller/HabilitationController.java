@@ -98,6 +98,7 @@ public class HabilitationController {
      */
     @PostMapping("save-habilitation")
     public ResponseEntity<?> saveHabilitation(@RequestBody HabilitationDTO h) {
+        System.out.println("HabilitationDTO "+h.toString());
         Optional<Profile> p = profileService.getProfile(h.getProfile());
         List<PermissionDTO> listPM = h.getPermissions();
 

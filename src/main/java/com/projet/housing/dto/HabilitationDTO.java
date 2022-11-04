@@ -35,4 +35,13 @@ public class HabilitationDTO {
     public void setPermissions(List<PermissionDTO> permissions) {
         this.permissions = permissions;
     }
+
+    @Override
+    public String toString() {
+        return "HabilitationDTO{" +
+            " profile='" + getProfile() + "'" +
+            ", permissions='" + getPermissions() + "'" +
+            "}";
+    }
+    
 }
