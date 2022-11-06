@@ -87,10 +87,5 @@ public class UserDTO {
     public void setProfile(String profile) {
         this.profile = profile;
     }
-
-    @Override
-    public String toString() {
-        return "UserDTO{" +"nom=" + nom +  "prenom=" + prenom +  "username=" + username + ", password=" + password + ", profile=" + profile + '}';
-    }
     
 }

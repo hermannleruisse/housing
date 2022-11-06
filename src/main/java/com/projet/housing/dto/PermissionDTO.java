@@ -63,8 +63,4 @@ public class PermissionDTO {
         this.checked = checked;
     }
 
-    @Override
-    public String toString() {
-        return "PermissionDTO{" +"id=" + id +  "code=" + code +  "libelle=" + libelle + ", checked=" + checked + '}';
-    }
 }

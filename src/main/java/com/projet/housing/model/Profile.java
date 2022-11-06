@@ -17,6 +17,8 @@ import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.annotations.GenericGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  *
  * @author lerusse
@@ -41,6 +43,7 @@ public class Profile {
     @NotBlank(message = "La description est obligatoire")
     private String description;
     
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "profile_permission", joinColumns = @JoinColumn(name = "profile_id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id"))
@@ -96,10 +99,5 @@ public class Profile {
 
     public void setPermissions(Set<Permission> permissions) {
         this.permissions = permissions;
-    }
-
-    @Override
-    public String toString() {
-        return "Profile{" + "id=" + id + ", code=" + code + ", libelle=" + libelle + ", description=" + description + ", permissions=" + permissions + '}';
     }    
 }

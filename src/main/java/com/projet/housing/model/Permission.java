@@ -18,6 +18,8 @@ import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
 import org.hibernate.annotations.GenericGenerator;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  *
  * @author lerusse
@@ -42,6 +44,7 @@ public class Permission implements Serializable{
     @JoinColumn(name = "menu_id", nullable = false)
     private Menu menu;
     
+    @JsonIgnore
     @ManyToMany(mappedBy = "permissions", fetch = FetchType.EAGER)
     Set<Profile> profile;
 
@@ -97,10 +100,5 @@ public class Permission implements Serializable{
 
     public void setProfile(Set<Profile> profile) {
         this.profile = profile;
-    }
-
-    @Override
-    public String toString() {
-        return "Permission{" + "id=" + id + ", code=" + code + ", libelle=" + libelle + ", menu=" + menu + ", profile=" + profile + '}';
     }
 }

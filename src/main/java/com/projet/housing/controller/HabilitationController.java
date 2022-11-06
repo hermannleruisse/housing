@@ -71,8 +71,13 @@ public class HabilitationController {
                         
                             Profile currentProfile = prof.get();
                             if (!currentProfile.getPermissions().isEmpty()) {
+
                                 currentProfile.getPermissions().forEach(x -> {
-                                    listP.add(new PermissionDTO(x.getId(), x.getCode(), p.getLibelle(), Boolean.TRUE));
+                                    if(p.equals(x)){
+                                        listP.add(new PermissionDTO(p.getId(), p.getCode(), p.getLibelle(), Boolean.TRUE));
+                                    }else{
+                                        listP.add(new PermissionDTO(p.getId(), p.getCode(), p.getLibelle(), Boolean.FALSE));
+                                    }
                                 });
                             }else{
                                 listP.add(new PermissionDTO(p.getId(), p.getCode(), p.getLibelle(), Boolean.FALSE));
