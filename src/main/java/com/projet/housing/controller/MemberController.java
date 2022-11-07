@@ -1,10 +1,14 @@
 package com.projet.housing.controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpHeaders;
@@ -47,16 +51,20 @@ public class MemberController {
      *
      * @param member An object member
      * @return The member object saved
+     * @throws IOException
      */
     @PreAuthorize("hasAuthority('PM_ADD_ME')")
     @PostMapping("/save-member")
-    public Object createMember(@Valid @RequestBody MemberDTO member) {
+    public Object createMember(@Valid @RequestBody MemberDTO member) throws IOException {
         Optional<Member> us = mRepository.checkIfMemberExistByNomAndPrenom(member.getNom(), member.getPrenom());
         if (us.isPresent()) {
             final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
                     environment.getProperty("unique.membername"), environment.getProperty("unique.membername"));
             return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
         } else {
+            byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto());
+            FileUtils.writeByteArrayToFile(new File("outputFileName"), decodedBytes);
+            
             return memberService.saveMember(us.get());
         }
     }
