@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,11 +24,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.projet.housing.db.MemberRepository;
 import com.projet.housing.dto.ApiError;
 import com.projet.housing.dto.MemberDTO;
+import com.projet.housing.helper.FileUtil;
 import com.projet.housing.model.Member;
 import com.projet.housing.service.MemberService;
 
@@ -55,16 +59,22 @@ public class MemberController {
      */
     @PreAuthorize("hasAuthority('PM_ADD_ME')")
     @PostMapping("/save-member")
-    public Object createMember(@Valid @RequestBody MemberDTO member) throws IOException {
+    public Object createMember(@Valid @RequestBody MemberDTO member, @RequestParam("file") MultipartFile multipartFile) throws IOException {
         Optional<Member> us = mRepository.checkIfMemberExistByNomAndPrenom(member.getNom(), member.getPrenom());
         if (us.isPresent()) {
             final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
                     environment.getProperty("unique.membername"), environment.getProperty("unique.membername"));
             return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
         } else {
+            String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+            long size = multipartFile.getSize();
+
+            FileUtil.saveFile(fileName, member.getNom().concat(member.getPrenom()), multipartFile);
+            /*convert file to base 64
             byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto());
             FileUtils.writeByteArrayToFile(new File("outputFileName"), decodedBytes);
-            
+            https://www.codejava.net/frameworks/spring-boot/file-download-upload-rest-api-examples
+            */
             return memberService.saveMember(us.get());
         }
     }
