@@ -11,8 +11,10 @@ import javax.validation.Valid;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
@@ -65,11 +67,16 @@ public class MemberController {
             final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
                     environment.getProperty("unique.membername"), environment.getProperty("unique.membername"));
             return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-        } else {
+        } /*else if(multipartFile.getSize() < ){
+
+        }*/else {
             String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+            String realName = member.getNom().concat(member.getPrenom());
+            
+            us.get().setPhoto(realName);
             long size = multipartFile.getSize();
 
-            FileUtil.saveFile(fileName, member.getNom().concat(member.getPrenom()), multipartFile);
+            FileUtil.saveFile(fileName, realName, multipartFile);
             /*convert file to base 64
             byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto());
             FileUtils.writeByteArrayToFile(new File("outputFileName"), decodedBytes);
@@ -77,6 +84,29 @@ public class MemberController {
             */
             return memberService.saveMember(us.get());
         }
+    }
+
+    @GetMapping("/downloadFile/{fileCode}")
+    public ResponseEntity<?> downloadFile(@PathVariable("fileCode") String fileCode) {
+         
+        Resource resource = null;
+        try {
+            resource = FileUtil.getFileAsResource(fileCode);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+         
+        if (resource == null) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+         
+        String contentType = "application/octet-stream";
+        String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
+         
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+                .body(resource);       
     }
 
     /**
