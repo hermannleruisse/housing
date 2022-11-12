@@ -39,7 +39,7 @@ import com.projet.housing.service.MemberService;
 
 
 @RestController
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+// @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
 @RequestMapping("/api/manager")
 @CrossOrigin
 public class MemberController {
@@ -59,7 +59,7 @@ public class MemberController {
      * @return The member object saved
      * @throws IOException
      */
-    @PreAuthorize("hasAuthority('PM_ADD_ME')")
+    // @PreAuthorize("hasAuthority('PM_ADD_ME')")
     @PostMapping("/save-member")
     public Object createMember(@Valid @RequestBody MemberDTO member, @RequestParam("file") MultipartFile multipartFile) throws IOException {
         Optional<Member> us = mRepository.checkIfMemberExistByNomAndPrenom(member.getNom(), member.getPrenom());
@@ -142,7 +142,7 @@ public class MemberController {
      * @param member - The member object updated
      * @return
      */
-    @PreAuthorize("hasAuthority('PM_EDI_ME')")
+    // @PreAuthorize("hasAuthority('PM_EDI_ME')")
     @PutMapping("/edit-member/{id}")
     public Member updateMember(@PathVariable("id") final String id, @Valid @RequestBody MemberDTO member) {
         Optional<Member> e = memberService.getMember(id);
@@ -190,7 +190,7 @@ public class MemberController {
      *
      * @param id - The id of the member to delete
      */
-    @PreAuthorize("hasAuthority('PM_DEL_ME')")
+    // @PreAuthorize("hasAuthority('PM_DEL_ME')")
     @DeleteMapping("/delete-member/{id}")
     public void deleteMember(@PathVariable("id") final String id) {
         memberService.deleteMember(id);
