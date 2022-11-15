@@ -2,6 +2,7 @@ package com.projet.housing.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -61,20 +62,59 @@ public class MemberController {
      */
     // @PreAuthorize("hasAuthority('PM_ADD_ME')")
     @PostMapping("/save-member")
+    public Object createMember(@RequestParam MultipartFile multipartFile,
+    @RequestParam String nom,
+    @RequestParam String prenom,
+    @RequestParam String adresse,
+    @RequestParam String dateDeNaissance,
+    @RequestParam String ministere,
+    @RequestParam String sexe,
+    @RequestParam String photo,
+    @RequestParam String telephone
+    ) throws IOException {
+        Optional<Member> us = mRepository.checkIfMemberExistByNomAndPrenom(nom, prenom);
+        if (us.isPresent()) {
+            final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
+                    environment.getProperty("unique.membername"), environment.getProperty("unique.membername"));
+            return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+        } else if(multipartFile.getSize() > (5*1024)){
+            final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
+                    environment.getProperty("file.error.message"), environment.getProperty("file.error.message"));
+            return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
+        }else {
+            // String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+            String realName = FileUtil.saveFile(nom.concat(prenom), multipartFile);
+
+            Member m = new Member();
+            m.setNom(nom);
+            m.setPrenom(prenom);
+            m.setSexe(sexe);
+            m.setTelephone(telephone);
+            m.setDateDeNaissance(dateDeNaissance);
+            m.setAdresse(adresse);
+            m.setPhoto(realName);
+
+            // https://www.codejava.net/frameworks/spring-boot/file-download-upload-rest-api-examples
+            
+            return memberService.saveMember(m);
+        }
+    }
+    
+    /*@PostMapping("/save-member")
     public Object createMember(@Valid @RequestBody MemberDTO member) throws IOException {
         Optional<Member> us = mRepository.checkIfMemberExistByNomAndPrenom(member.getNom(), member.getPrenom());
         if (us.isPresent()) {
             final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
                     environment.getProperty("unique.membername"), environment.getProperty("unique.membername"));
             return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-        } /*else if(multipartFile.getSize() < ){
-
-        }*/else {
-            // String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+        }else {
+            
             String realName = member.getNom().concat(member.getPrenom());
             byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto().split(",")[1]);
-            String ext = member.getPhoto().split(';')[0].split('/')[1];
-            FileUtils.writeByteArrayToFile(new File("outputFileName"), decodedBytes, true);
+            
+            String ext = member.getPhoto().split(";")[0].split("/")[1];
+            
+            FileUtils.writeByteArrayToFile(new File(realName.concat(".").concat(ext)), decodedBytes, true);
 
             Member m = new Member();
             m.setNom(member.getNom());
@@ -84,17 +124,9 @@ public class MemberController {
             m.setDateDeNaissance(member.getDateDeNaissance());
             m.setAdresse(member.getAdresse());
             m.setPhoto(realName);
-            // long size = multipartFile.getSize();
-
-            // FileUtil.saveFile(fileName, realName, multipartFile);
-            /*convert base 64 to file
-            byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto());
-            FileUtils.writeByteArrayToFile(new File("outputFileName"), decodedBytes);
-            https://www.codejava.net/frameworks/spring-boot/file-download-upload-rest-api-examples
-            */
             return memberService.saveMember(m);
         }
-    }
+    }*/
 
     @GetMapping("/downloadFile/{fileCode}")
     public ResponseEntity<?> downloadFile(@PathVariable("fileCode") String fileCode) {

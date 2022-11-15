@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileUtil {
     private static Path foundFile;
 
-    public static String saveFile(String fileName, String fileCode, MultipartFile multipartFile) throws IOException{
+    public static String saveFile(String fileName, MultipartFile multipartFile) throws IOException{
         Path uploadPath = Paths.get("Files-Upload");
         
         if(!Files.exists(uploadPath)){
@@ -22,12 +22,12 @@ public class FileUtil {
         }
 
         try(InputStream inputStream = multipartFile.getInputStream()) {
-            Path filePath = uploadPath.resolve(fileCode+"-"+fileName);
+            Path filePath = uploadPath.resolve(fileName);
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ioe) {
             throw new IOException("Fichier non sauvegarder: " + fileName, ioe);
         }
-        return fileCode;
+        return fileName;
     }
 
     public static UrlResource getFileAsResource(String fileCode) throws IOException {
