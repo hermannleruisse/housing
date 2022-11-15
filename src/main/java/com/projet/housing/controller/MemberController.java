@@ -61,7 +61,7 @@ public class MemberController {
      */
     // @PreAuthorize("hasAuthority('PM_ADD_ME')")
     @PostMapping("/save-member")
-    public Object createMember(@Valid @RequestBody MemberDTO member, @RequestParam("file") MultipartFile multipartFile) throws IOException {
+    public Object createMember(@Valid @RequestBody MemberDTO member) throws IOException {
         Optional<Member> us = mRepository.checkIfMemberExistByNomAndPrenom(member.getNom(), member.getPrenom());
         if (us.isPresent()) {
             final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -70,19 +70,29 @@ public class MemberController {
         } /*else if(multipartFile.getSize() < ){
 
         }*/else {
-            String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+            // String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
             String realName = member.getNom().concat(member.getPrenom());
-            
-            us.get().setPhoto(realName);
-            long size = multipartFile.getSize();
+            byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto().split(",")[1]);
+            String ext = member.getPhoto().split(';')[0].split('/')[1];
+            FileUtils.writeByteArrayToFile(new File("outputFileName"), decodedBytes, true);
 
-            FileUtil.saveFile(fileName, realName, multipartFile);
-            /*convert file to base 64
+            Member m = new Member();
+            m.setNom(member.getNom());
+            m.setPrenom(member.getPrenom());
+            m.setSexe(member.getSexe());
+            m.setTelephone(member.getTelephone());
+            m.setDateDeNaissance(member.getDateDeNaissance());
+            m.setAdresse(member.getAdresse());
+            m.setPhoto(realName);
+            // long size = multipartFile.getSize();
+
+            // FileUtil.saveFile(fileName, realName, multipartFile);
+            /*convert base 64 to file
             byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto());
             FileUtils.writeByteArrayToFile(new File("outputFileName"), decodedBytes);
             https://www.codejava.net/frameworks/spring-boot/file-download-upload-rest-api-examples
             */
-            return memberService.saveMember(us.get());
+            return memberService.saveMember(m);
         }
     }
 
