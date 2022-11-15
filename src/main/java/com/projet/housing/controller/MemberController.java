@@ -3,6 +3,7 @@ package com.projet.housing.controller;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,7 +40,6 @@ import com.projet.housing.helper.FileUtil;
 import com.projet.housing.model.Member;
 import com.projet.housing.service.MemberService;
 
-
 @RestController
 // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
 @RequestMapping("/api/manager")
@@ -53,6 +54,9 @@ public class MemberController {
     @Autowired
     private Environment environment;
 
+    @Autowired
+    ResourceLoader resourceLoader;
+
     /**
      * Create - Add a new member
      *
@@ -62,59 +66,23 @@ public class MemberController {
      */
     // @PreAuthorize("hasAuthority('PM_ADD_ME')")
     @PostMapping("/save-member")
-    public Object createMember(@RequestParam MultipartFile multipartFile,
-    @RequestParam String nom,
-    @RequestParam String prenom,
-    @RequestParam String adresse,
-    @RequestParam String dateDeNaissance,
-    @RequestParam String ministere,
-    @RequestParam String sexe,
-    @RequestParam String photo,
-    @RequestParam String telephone
-    ) throws IOException {
-        Optional<Member> us = mRepository.checkIfMemberExistByNomAndPrenom(nom, prenom);
-        if (us.isPresent()) {
-            final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
-                    environment.getProperty("unique.membername"), environment.getProperty("unique.membername"));
-            return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-        } else if(multipartFile.getSize() > (5*1024)){
-            final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
-                    environment.getProperty("file.error.message"), environment.getProperty("file.error.message"));
-            return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-        }else {
-            // String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
-            String realName = FileUtil.saveFile(nom.concat(prenom), multipartFile);
-
-            Member m = new Member();
-            m.setNom(nom);
-            m.setPrenom(prenom);
-            m.setSexe(sexe);
-            m.setTelephone(telephone);
-            m.setDateDeNaissance(dateDeNaissance);
-            m.setAdresse(adresse);
-            m.setPhoto(realName);
-
-            // https://www.codejava.net/frameworks/spring-boot/file-download-upload-rest-api-examples
-            
-            return memberService.saveMember(m);
-        }
-    }
-    
-    /*@PostMapping("/save-member")
     public Object createMember(@Valid @RequestBody MemberDTO member) throws IOException {
         Optional<Member> us = mRepository.checkIfMemberExistByNomAndPrenom(member.getNom(), member.getPrenom());
         if (us.isPresent()) {
             final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR,
                     environment.getProperty("unique.membername"), environment.getProperty("unique.membername"));
             return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-        }else {
-            
-            String realName = member.getNom().concat(member.getPrenom());
-            byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto().split(",")[1]);
-            
-            String ext = member.getPhoto().split(";")[0].split("/")[1];
-            
-            FileUtils.writeByteArrayToFile(new File(realName.concat(".").concat(ext)), decodedBytes, true);
+        } else {
+
+            // String realName = member.getNom().concat(member.getPrenom());
+            // byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto().split(",")[1]);
+
+            // String ext = member.getPhoto().split(";")[0].split("/")[1];
+
+            // FileUtils.writeByteArrayToFile(
+            //         new File(resourceLoader.getResource("/upload-file/").getURL() + realName.concat(".").concat(ext)),
+            //         decodedBytes, true);
+            String photoName = base64ToImage(member);
 
             Member m = new Member();
             m.setNom(member.getNom());
@@ -123,32 +91,57 @@ public class MemberController {
             m.setTelephone(member.getTelephone());
             m.setDateDeNaissance(member.getDateDeNaissance());
             m.setAdresse(member.getAdresse());
-            m.setPhoto(realName);
+            m.setPhoto(photoName);
             return memberService.saveMember(m);
         }
-    }*/
+    }
+
+    private String base64ToImage(MemberDTO member) throws IOException {
+        byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto().split(",")[1]);
+        
+        String ext = member.getPhoto().split(";")[0].split("/")[1];
+        String realName = member.getNom().concat(member.getPrenom()).concat(".").concat(ext);
+
+        FileUtils.writeByteArrayToFile(
+                new File(resourceLoader.getResource("/upload-file/").getURL() + realName.concat(".").concat(ext)),
+                decodedBytes, true);
+        return realName;
+    }
+
+    /**
+     * @param fileName
+     * @return
+     */
+    private boolean deleteFile(String fileName){
+        try {
+            Files.delete(Paths.get(resourceLoader.getResource("/upload-file/") + fileName));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
 
     @GetMapping("/downloadFile/{fileCode}")
     public ResponseEntity<?> downloadFile(@PathVariable("fileCode") String fileCode) {
-         
+
         Resource resource = null;
         try {
             resource = FileUtil.getFileAsResource(fileCode);
         } catch (IOException e) {
             return ResponseEntity.badRequest().build();
         }
-         
+
         if (resource == null) {
             return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
         }
-         
+
         String contentType = "application/octet-stream";
         String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
-         
+
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
-                .body(resource);       
+                .body(resource);
     }
 
     /**
@@ -180,13 +173,14 @@ public class MemberController {
     /**
      * Update - Update an existing member
      *
-     * @param id - The id of the member to update
+     * @param id     - The id of the member to update
      * @param member - The member object updated
      * @return
+     * @throws IOException
      */
     // @PreAuthorize("hasAuthority('PM_EDI_ME')")
     @PutMapping("/edit-member/{id}")
-    public Member updateMember(@PathVariable("id") final String id, @Valid @RequestBody MemberDTO member) {
+    public Member updateMember(@PathVariable("id") final String id, @Valid @RequestBody MemberDTO member) throws IOException {
         Optional<Member> e = memberService.getMember(id);
         if (e.isPresent()) {
             Member currentMember = e.get();
@@ -217,9 +211,10 @@ public class MemberController {
             }
             String photo = member.getPhoto();
             if (photo != null) {
-                currentMember.setPhoto(photo);
+                String photoName = base64ToImage(member);
+                currentMember.setPhoto(photoName);
             }
-            
+
             memberService.saveMember(currentMember);
             return currentMember;
         } else {
@@ -235,6 +230,13 @@ public class MemberController {
     // @PreAuthorize("hasAuthority('PM_DEL_ME')")
     @DeleteMapping("/delete-member/{id}")
     public void deleteMember(@PathVariable("id") final String id) {
+        // suppression du fichier physique
+        Optional<Member> e = memberService.getMember(id);
+        if (e.isPresent()) {
+            Member currentMember = e.get();
+            deleteFile(currentMember.getPhoto());
+        }
+        
         memberService.deleteMember(id);
     }
 
