@@ -1,6 +1,7 @@
 package com.projet.housing.controller;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -8,6 +9,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.ServletContext;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
@@ -57,6 +59,9 @@ public class MemberController {
     @Autowired
     ResourceLoader resourceLoader;
 
+    @Autowired
+    ServletContext servletContext;
+
     /**
      * Create - Add a new member
      *
@@ -96,14 +101,23 @@ public class MemberController {
         }
     }
 
+    /**
+     * @param member
+     * @return
+     * @throws IOException
+     */
     private String base64ToImage(MemberDTO member) throws IOException {
         byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto().split(",")[1]);
         
         String ext = member.getPhoto().split(";")[0].split("/")[1];
         String realName = member.getNom().concat(member.getPrenom()).concat(".").concat(ext);
-        System.out.println("chemin =>"+Paths.get("./upload-file").toAbsolutePath().normalize());
+        
+        // String directory = servletContext.getRealPath("/")+"upload-file";
+        // new FileOutputStream(directory).write(decodedBytes);
+        System.out.println("chemin =>"+Paths.get("./upload-file").toAbsolutePath().normalize().toString());
+        
         FileUtils.writeByteArrayToFile(
-                new File(resourceLoader.getResource("/upload-file/") + realName),
+                new File(Paths.get("./upload-file/").toAbsolutePath().normalize().toString(), realName),
                 decodedBytes, true);
         return realName;
     }
@@ -114,7 +128,7 @@ public class MemberController {
      */
     private boolean deleteFile(String fileName){
         try {
-            Files.delete(Paths.get(resourceLoader.getResource("/upload-file/") + fileName));
+            Files.delete(Paths.get("/.upload-file/" + fileName));
         } catch (IOException e) {
             e.printStackTrace();
         }
