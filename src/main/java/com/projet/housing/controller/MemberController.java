@@ -101,9 +101,9 @@ public class MemberController {
         
         String ext = member.getPhoto().split(";")[0].split("/")[1];
         String realName = member.getNom().concat(member.getPrenom()).concat(".").concat(ext);
-
+        System.out.println("chemin =>"+Paths.get("./upload-file").toAbsolutePath().normalize());
         FileUtils.writeByteArrayToFile(
-                new File(resourceLoader.getResource("/upload-file/").getURL() + realName.concat(".").concat(ext)),
+                new File(resourceLoader.getResource("/upload-file/") + realName),
                 decodedBytes, true);
         return realName;
     }
