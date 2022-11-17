@@ -144,7 +144,7 @@ public class MemberController {
         }
 
         String contentType = "image/png";
-        String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
+        String headerValue = "inline; filename=\"" + resource.getFilename() + "\"";
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
