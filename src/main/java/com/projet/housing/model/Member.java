@@ -4,7 +4,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -40,7 +43,12 @@ public class Member {
     @NotBlank(message = "Le téléphone est obligatoire")
     private String telephone;
 
-    @Column(nullable = true)
+    @ManyToOne
+    @JoinColumn(name = "ministere_id", nullable = false)
+    @NotNull(message = "Le ministère est obligatoire")
+    private Minister ministere;
+
+    @Column(nullable = false)
     private String photo;
 
     /**
@@ -153,6 +161,14 @@ public class Member {
      */
     public void setPhoto(String photo) {
         this.photo = photo;
+    }
+
+    public Minister getMinistere() {
+        return ministere;
+    }
+
+    public void setMinistere(Minister ministere) {
+        this.ministere = ministere;
     }
 
 }

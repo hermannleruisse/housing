@@ -3,6 +3,7 @@ package com.projet.housing.controller;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.StackWalker.Option;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
@@ -40,7 +41,9 @@ import com.projet.housing.dto.ApiError;
 import com.projet.housing.dto.MemberDTO;
 import com.projet.housing.helper.FileUtil;
 import com.projet.housing.model.Member;
+import com.projet.housing.model.Minister;
 import com.projet.housing.service.MemberService;
+import com.projet.housing.service.MinisterService;
 
 @RestController
 // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
@@ -52,6 +55,9 @@ public class MemberController {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private MinisterService ministerService;
 
     @Autowired
     private Environment environment;
@@ -88,6 +94,7 @@ public class MemberController {
             //         new File(resourceLoader.getResource("/upload-file/").getURL() + realName.concat(".").concat(ext)),
             //         decodedBytes, true);
             String photoName = base64ToImage(member);
+            Optional<Minister> minister = ministerService.getMinister(member.getMinistere());
 
             Member m = new Member();
             m.setNom(member.getNom());
@@ -96,6 +103,7 @@ public class MemberController {
             m.setTelephone(member.getTelephone());
             m.setDateDeNaissance(member.getDateDeNaissance());
             m.setAdresse(member.getAdresse());
+            m.setMinistere(minister.get());
             m.setPhoto(photoName);
             return memberService.saveMember(m);
         }
@@ -223,6 +231,10 @@ public class MemberController {
             if (tel != null) {
                 currentMember.setTelephone(tel);
             }
+            Optional<Minister> min = ministerService.getMinister(member.getMinistere());
+            if (min != null) {
+                currentMember.setMinistere(min.get());
+            }
             String photo = member.getPhoto();
             if (photo != null) {
                 String photoName = base64ToImage(member);
@@ -244,10 +256,11 @@ public class MemberController {
     // @PreAuthorize("hasAuthority('PM_DEL_ME')")
     @DeleteMapping("/delete-member/{id}")
     public void deleteMember(@PathVariable("id") final String id) {
-        // suppression du fichier physique
+        
         Optional<Member> e = memberService.getMember(id);
         if (e.isPresent()) {
             Member currentMember = e.get();
+            // suppression du fichier physique
             deleteFile(currentMember.getPhoto());
         }
         

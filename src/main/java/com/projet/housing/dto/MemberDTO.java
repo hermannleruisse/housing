@@ -22,6 +22,9 @@ public class MemberDTO {
     @NotBlank(message = "Le téléphone est obligatoire")
     private String telephone;
 
+    @NotBlank(message = "Le ministère est obligatoire")
+    private String ministere;
+
     private String photo;
 
     /**
@@ -120,6 +123,14 @@ public class MemberDTO {
      */
     public void setPhoto(String photo) {
         this.photo = photo;
+    }
+
+    public String getMinistere() {
+        return ministere;
+    }
+
+    public void setMinistere(String ministere) {
+        this.ministere = ministere;
     }
 
 }
