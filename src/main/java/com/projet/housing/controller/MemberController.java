@@ -129,6 +129,29 @@ public class MemberController {
         return true;
     }
 
+    @GetMapping("/view-file/{fileCode}")
+    public ResponseEntity<?> viewFile(@PathVariable("fileCode") String fileCode) {
+
+        Resource resource = null;
+        try {
+            resource = FileUtil.getFileAsResource(fileCode);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (resource == null) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+
+        String contentType = "application/octet-stream";
+        String headerValue = "inline; filename=\"" + resource.getFilename() + "\"";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+                .body(resource);
+    }
+
     @GetMapping("/downloadFile/{fileCode}")
     public ResponseEntity<?> downloadFile(@PathVariable("fileCode") String fileCode) {
 
