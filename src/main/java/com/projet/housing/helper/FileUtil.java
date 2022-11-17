@@ -31,7 +31,7 @@ public class FileUtil {
     }
 
     public static UrlResource getFileAsResource(String fileCode) throws IOException {
-        Path dirPath = Paths.get("Files-Upload");
+        Path dirPath = Paths.get("./upload-file/").toAbsolutePath().normalize();
          
         Files.list(dirPath).forEach(file -> {
             if (file.getFileName().toString().equals(fileCode)) {
