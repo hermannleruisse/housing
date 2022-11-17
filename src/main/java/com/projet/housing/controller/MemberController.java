@@ -147,7 +147,7 @@ public class MemberController {
         String headerValue = "inline; filename="+ resource.getFilename();
 
         return ResponseEntity.ok()
-                // .contentType(MediaType.parseMediaType(contentType))
+                .contentType(MediaType.parseMediaType(contentType))
                 // .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .body(resource);
