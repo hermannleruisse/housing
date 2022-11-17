@@ -134,7 +134,7 @@ public class MemberController {
 
         Resource resource = null;
         try {
-            resource = FileUtil.getFileAsResource(fileCode);
+            resource = FileUtil.getFileAsResource(Paths.get("./upload-file/").toAbsolutePath().normalize().toString()+fileCode);
         } catch (IOException e) {
             return ResponseEntity.badRequest().build();
         }
