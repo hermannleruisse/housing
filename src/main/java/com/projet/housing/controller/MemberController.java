@@ -130,7 +130,7 @@ public class MemberController {
     }
 
     @GetMapping("/view/{fileCode}")
-    public ResponseEntity<?> viewFile(@PathVariable("fileCode") String fileCode) {
+    public ResponseEntity<?> view(@PathVariable("fileCode") String fileCode) {
 
         Resource resource = null;
         try {
@@ -143,12 +143,11 @@ public class MemberController {
             return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
         }
 
-        String contentType = "application/octet-stream";
-        String headerValue = "inline; filename="+ resource.getFilename();
+        String contentType = "image/*";
+        String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
-                // .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .body(resource);
     }
