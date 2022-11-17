@@ -143,11 +143,12 @@ public class MemberController {
             return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
         }
 
-        String contentType = "image/*";
+        String contentType = "image/png";
         String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
+                .contentType(MediaType.IMAGE_JPEG)
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .body(resource);
     }
