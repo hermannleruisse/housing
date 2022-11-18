@@ -29,4 +29,8 @@ public class MemberService {
         Member savedMember = memberRepository.save(member);
         return savedMember;
     }
+
+    public Iterable<Member> getSearchMembers(String motCle) {
+        return memberRepository.checkIfMemberExist(motCle);
+    }
 }
