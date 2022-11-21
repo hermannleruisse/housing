@@ -20,9 +20,9 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     Iterable<Member> checkIfMemberExist(@Param("mot") String mot);
 
     // Pagination
-    @Query(value = "SELECT m FROM Member m ORDER BY nom ASC")
-    Page<Member> findAllMemberWithPagination(Pageable pageable);
+    // @Query(value = "SELECT m FROM Member m ORDER BY nom ASC")
+    // Page<Member> findAllMemberWithPagination(Pageable pageable);
 
-    @Query(value = "SELECT * FROM member ORDER BY nom ASC", countQuery = "SELECT count(*) FROM member", nativeQuery = true)
-    Page<Member> findAllMemberWithPaginationNative(Pageable pageable);
+    // @Query(value = "SELECT * FROM member ORDER BY nom ASC", countQuery = "SELECT count(*) FROM member", nativeQuery = true)
+    // Page<Member> findAllMemberWithPaginationNative(Pageable pageable);
 }

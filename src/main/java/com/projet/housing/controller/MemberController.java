@@ -239,7 +239,7 @@ public class MemberController {
                 currentMember.setTelephone(tel);
             }
             Optional<Minister> min = ministerService.getMinister(member.getMinistere());
-            if (min != null) {
+            if (min.isPresent()) {
                 currentMember.setMinistere(min.get());
             }
             String photo = member.getPhoto();
