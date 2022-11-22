@@ -13,6 +13,9 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.projet.housing.db.MemberRepository;
 import com.projet.housing.dto.ApiError;
@@ -197,6 +201,14 @@ public class MemberController {
     @GetMapping("/members")
     public Iterable<Member> getMembers() {
         return memberService.getMembers();
+    }
+
+    @GetMapping("/members-list")
+    public Page<Member> getMembers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
+        // Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
+        //         : Sort.by(sortBy).descending();
+        Pageable paging = PageRequest.of(page, size);
+        return memberService.getMembers(paging);
     }
 
     /**
