@@ -1,5 +1,8 @@
 package com.projet.housing.model;
 
+import java.time.Instant;
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,6 +13,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
 public class Member {
@@ -50,6 +56,13 @@ public class Member {
 
     @Column(nullable = false)
     private String photo;
+
+    @CreatedDate
+    private Date createdDate;
+
+    // https://www.section.io/engineering-education/spring-boot-jaspersoft-reports/
+    @LastModifiedDate
+    private Date lastModifiedDate;
 
     /**
      * @return String return the id
