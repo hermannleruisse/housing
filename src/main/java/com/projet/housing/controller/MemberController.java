@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -225,6 +226,7 @@ public class MemberController {
         Optional<Member> e = memberService.getMember(id);
         if (e.isPresent()) {
             Member currentMember = e.get();
+            currentMember.setLastModifiedDate(new Date());
 
             String membername = member.getNom();
             if (membername != null) {

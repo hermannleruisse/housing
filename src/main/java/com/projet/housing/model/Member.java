@@ -58,7 +58,7 @@ public class Member {
     private String photo;
 
     @CreatedDate
-    private Date createdDate;
+    private Date createdDate = new Date();
 
     // https://www.section.io/engineering-education/spring-boot-jaspersoft-reports/
     @LastModifiedDate
@@ -182,6 +182,37 @@ public class Member {
 
     public void setMinistere(Minister ministere) {
         this.ministere = ministere;
+    }
+
+    
+
+
+    /**
+     * @return Date return the createdDate
+     */
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    /**
+     * @param createdDate the createdDate to set
+     */
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    /**
+     * @return Date return the lastModifiedDate
+     */
+    public Date getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    /**
+     * @param lastModifiedDate the lastModifiedDate to set
+     */
+    public void setLastModifiedDate(Date lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
     }
 
 }
