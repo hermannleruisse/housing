@@ -38,6 +38,10 @@ import com.projet.housing.model.Member;
 import com.projet.housing.model.Minister;
 import com.projet.housing.service.MemberService;
 import com.projet.housing.service.MinisterService;
+import com.projet.housing.service.ReportService;
+
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperPrint;
 
 @RestController
 // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
@@ -55,6 +59,9 @@ public class MemberController {
 
     @Autowired
     private Environment environment;
+
+    @Autowired
+    private ReportService reportService;
 
     /**
      * Create - Add a new member
@@ -152,6 +159,33 @@ public class MemberController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .body(resource);
+    }
+
+    @GetMapping("/report")
+    public ResponseEntity<?> viewReport() {
+        
+        Resource resource = null;
+        try {
+            resource = FileUtil.getFileAsResource(fileCode);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (resource == null) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+
+        try{
+            JasperPrint report = reportService.getJasperPrint(memberService.getMembers(), "classpath:employees-details.jrxml");
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setContentType(MediaType.APPLICATION_PDF);
+            httpHeaders.setContentDispositionFormData("filename", "list_membre.pdf");
+    
+            return new ResponseEntity<byte[]>
+                        (JasperExportManager.exportReportToPdf(report), httpHeaders, HttpStatus.OK);
+        }catch(Exception ex){
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/downloadFile/{fileCode}")
