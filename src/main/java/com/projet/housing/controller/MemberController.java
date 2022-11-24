@@ -162,6 +162,7 @@ public class MemberController {
                 .body(resource);
     }
 
+    // https://www.techgeeknext.com/install-jasper-studio
     // resourceLocation = "classpath:employees-details.jrxml"
     @GetMapping("/report-liste-membre")
     public ResponseEntity<?> viewReportAllMember() {
