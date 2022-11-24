@@ -3,7 +3,6 @@ package com.projet.housing.service;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +21,6 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 @Service
 public class ReportService {
 
-    // https://sourceforge.net/projects/jasperstudio/
-    // resourceLocation = "classpath:employees-details.jrxml"
     public JasperPrint getJasperPrint(List<Member> list, String resourceLocation) throws FileNotFoundException, JRException {
         File file = ResourceUtils.getFile(resourceLocation);
         JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());

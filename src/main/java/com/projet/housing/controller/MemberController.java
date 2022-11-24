@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -161,28 +162,17 @@ public class MemberController {
                 .body(resource);
     }
 
-    @GetMapping("/report")
-    public ResponseEntity<?> viewReport() {
-        
-        Resource resource = null;
-        try {
-            resource = FileUtil.getFileAsResource(fileCode);
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        if (resource == null) {
-            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
-        }
-
+    // resourceLocation = "classpath:employees-details.jrxml"
+    @GetMapping("/report-liste-membre")
+    public ResponseEntity<?> viewReportAllMember() {
         try{
-            JasperPrint report = reportService.getJasperPrint(memberService.getMembers(), "classpath:employees-details.jrxml");
+            JasperPrint report = reportService.getJasperPrint( memberService.listMember(), "classpath:liste-des-membres.jrxml");
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setContentType(MediaType.APPLICATION_PDF);
-            httpHeaders.setContentDispositionFormData("filename", "list_membre.pdf");
+            httpHeaders.setContentDispositionFormData("filename", "liste_des_membres.pdf");
     
-            return new ResponseEntity<byte[]>
-                        (JasperExportManager.exportReportToPdf(report), httpHeaders, HttpStatus.OK);
+            return new ResponseEntity<byte[]>(
+                JasperExportManager.exportReportToPdf(report), httpHeaders, HttpStatus.OK);
         }catch(Exception ex){
             return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
         }

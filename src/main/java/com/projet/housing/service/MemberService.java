@@ -1,5 +1,6 @@
 package com.projet.housing.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,10 @@ public class MemberService {
     }
     
     public Iterable<Member> getMembers() {
+        return memberRepository.findAll();
+    }
+
+    public List<Member> listMember() {
         return memberRepository.findAll();
     }
 
