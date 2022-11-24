@@ -36,7 +36,7 @@ public class MemberService {
         return savedMember;
     }
 
-    public Iterable<Member> getSearchMembers(String motCle) {
-        return memberRepository.checkIfMemberExist(motCle);
+    public Page<Member> getSearchMembers(String motCle, Pageable pageable) {
+        return memberRepository.checkIfMemberExist(motCle, pageable);
     }
 }

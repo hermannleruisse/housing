@@ -2,8 +2,8 @@ package com.projet.housing.db;
 
 import java.util.Optional;
 
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,8 +16,8 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     @Query(value = "SELECT * FROM member u WHERE u.nom = ?1 and u.prenom = ?2", nativeQuery = true)
     Optional<Member> checkIfMemberExistByNomAndPrenom(String nom, String prenom);
 
-    @Query(value = "SELECT * FROM member u WHERE u.nom LIKE %:mot% OR u.prenom LIKE %:mot%", nativeQuery = true)
-    Iterable<Member> checkIfMemberExist(@Param("mot") String mot);
+    @Query(value = "SELECT * FROM member u, minister m WHERE u.ministere_id = m.id AND u.nom LIKE %:mot% OR u.prenom LIKE %:mot% OR u.sexe LIKE %:mot% OR m.libelle LIKE %:mot%", nativeQuery = true)
+    Page<Member> checkIfMemberExist(@Param("mot") String mot, Pageable pageable);
 
     // Pagination
     // @Query(value = "SELECT m FROM Member m ORDER BY nom ASC")
