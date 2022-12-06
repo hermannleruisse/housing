@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -165,13 +168,14 @@ public class MemberController {
     // https://www.techgeeknext.com/install-jasper-studio
     // resourceLocation = "classpath:employees-details.jrxml"
     @GetMapping("/report-liste-membre")
-    public ResponseEntity<?> viewReportAllMember() {
+    public ResponseEntity<?> viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister) {
         try{
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put("createdBy", "David");
-            parameters.put("createdAt", "David");
+            parameters.put("nomPrenomP", "%"+nomPrenom+"%");
+            parameters.put("sexeP", "%"+sexe+"%");
+            parameters.put("ministerP", "%"+minister+"%");
 
-            JasperPrint report = reportService.getJasperPrint(memberService.listMember(), "classpath:liste-des-membres.jrxml", parameters);
+            JasperPrint report = reportService.getJasperPrint(memberService.listMember(), "classpath:member_list.jrxml", parameters);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setContentType(MediaType.APPLICATION_PDF);
             httpHeaders.setContentDispositionFormData("filename", "liste_des_membres.pdf");
