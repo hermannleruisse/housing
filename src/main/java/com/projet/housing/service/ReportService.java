@@ -21,14 +21,10 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 @Service
 public class ReportService {
 
-    public JasperPrint getJasperPrint(List<Member> list, String resourceLocation) throws FileNotFoundException, JRException {
+    public JasperPrint getJasperPrint(List<Member> list, String resourceLocation, Map<String, Object> parameters) throws FileNotFoundException, JRException {
         File file = ResourceUtils.getFile(resourceLocation);
         JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
         JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(list);
-        
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("createdBy", "David");
-        parameters.put("createdAt", "David");
 
         JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 

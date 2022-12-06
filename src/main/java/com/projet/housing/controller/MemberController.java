@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -167,7 +169,11 @@ public class MemberController {
     @GetMapping("/report-liste-membre")
     public ResponseEntity<?> viewReportAllMember() {
         try{
-            JasperPrint report = reportService.getJasperPrint( memberService.listMember(), "classpath:liste-des-membres.jrxml");
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("createdBy", "David");
+            parameters.put("createdAt", "David");
+
+            JasperPrint report = reportService.getJasperPrint(memberService.listMember(), "classpath:liste-des-membres.jrxml", parameters);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setContentType(MediaType.APPLICATION_PDF);
             httpHeaders.setContentDispositionFormData("filename", "liste_des_membres.pdf");
