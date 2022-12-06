@@ -5,9 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -19,6 +16,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -234,14 +232,49 @@ public class MemberController {
         return memberService.getMembers();
     }
 
+    /**
+     * retourne la liste des membres ordonnés avec pagination 
+     * @param page
+     * @param size
+     * @return
+     */
     @GetMapping("/members-list")
     public Page<Member> getMembers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
         // Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
         //         : Sort.by(sortBy).descending();
-        Pageable paging = PageRequest.of(page, size);
+        Pageable paging = PageRequest.of(page, size, Sort.by("createdDate").descending().and(Sort.by("lastModifiedDate").descending()));
         return memberService.getMembers(paging);
     }
 
+    /**
+     * retourne la liste des membres en fonction du mot clé rechercher
+     * @param search
+     * @param page
+     * @param size
+     * @return
+     */
+    
+    @GetMapping("/search-members-list/{search}")
+    public Page<Member> getSearchMembers(@PathVariable("search") final String search, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
+        Pageable paging = PageRequest.of(page, size);
+        return memberService.getSearchMembers(search, paging);
+    }
+
+    /**
+     * retourne la liste des membres en fonction du mot clé rechercher, ministere, sexe
+     * @param search
+     * @param page
+     * @param size
+     * @param sexe
+     * @param minister
+     * @return
+     */
+    @GetMapping(value = {"/search-multi", "/search-multi/{search}"})
+    public Page<Member> getSearchMultiCriteriaMembers(@PathVariable(name = "search", required = false) final String search, @RequestParam(defaultValue = "0") int page, 
+    @RequestParam(defaultValue = "3") int size, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister) {
+        Pageable paging = PageRequest.of(page, size);
+        return memberService.getSearchMembersMultiCriteria(search, sexe, minister, paging);
+    }
     /**
      * Update - Update an existing member
      *
@@ -256,6 +289,7 @@ public class MemberController {
         Optional<Member> e = memberService.getMember(id);
         if (e.isPresent()) {
             Member currentMember = e.get();
+            currentMember.setLastModifiedDate(new Date());
 
             String membername = member.getNom();
             if (membername != null) {

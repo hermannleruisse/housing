@@ -41,7 +41,23 @@ public class MemberService {
         return savedMember;
     }
 
-    public Iterable<Member> getSearchMembers(String motCle) {
-        return memberRepository.checkIfMemberExist(motCle);
+    public Page<Member> getSearchMembers(String motCle, Pageable pageable) {
+        return memberRepository.checkIfMemberExist(motCle, pageable);
     }
+
+    /**
+     * @param motCle
+     * @param sexe
+     * @param minister
+     * @param pageable
+     * @return
+     */
+    public Page<Member> getSearchMembersMultiCriteria(String motCle, String sexe, String minister, Pageable pageable) {
+        return memberRepository.checkIfMemberExistMultiCriteria(motCle, sexe, minister, pageable);
+    }
+
+    public List<Member> getSearchMembersForPrint(String motCle, String sexe, String minister) {
+        return memberRepository.checkIfMemberExistMultiCriteriaPrint(motCle, sexe, minister);
+    }
+ 
 }
