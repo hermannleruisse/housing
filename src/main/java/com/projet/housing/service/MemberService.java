@@ -40,9 +40,15 @@ public class MemberService {
         return memberRepository.checkIfMemberExist(motCle, pageable);
     }
 
+    /**
+     * @param motCle
+     * @param sexe
+     * @param minister
+     * @param pageable
+     * @return
+     */
     public Page<Member> getSearchMembersMultiCriteria(String motCle, String sexe, String minister, Pageable pageable) {
         return memberRepository.checkIfMemberExistMultiCriteria(motCle, sexe, minister, pageable);
     }
-
-    
+ 
 }
