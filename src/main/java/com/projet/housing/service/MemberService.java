@@ -1,5 +1,6 @@
 package com.projet.housing.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,10 @@ public class MemberService {
      */
     public Page<Member> getSearchMembersMultiCriteria(String motCle, String sexe, String minister, Pageable pageable) {
         return memberRepository.checkIfMemberExistMultiCriteria(motCle, sexe, minister, pageable);
+    }
+
+    public List<Member> getSearchMembersForPrint(String motCle, String sexe, String minister) {
+        return memberRepository.checkIfMemberExistMultiCriteriaPrint(motCle, sexe, minister);
     }
  
 }
