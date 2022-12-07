@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -178,7 +179,8 @@ public class MemberController {
             JasperPrint report = reportService.getJasperPrint(memberService.listMember(), "classpath:member_list.jrxml", parameters);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.setContentType(MediaType.APPLICATION_PDF);
-            httpHeaders.setContentDispositionFormData("filename", "liste_des_membres.pdf");
+            httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=liste_des_membres.pdf");
+            // httpHeaders.setContentDispositionFormData("filename", "liste_des_membres.pdf");
     
             return new ResponseEntity<byte[]>(
                 JasperExportManager.exportReportToPdf(report), httpHeaders, HttpStatus.OK);
