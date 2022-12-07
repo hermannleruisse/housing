@@ -2,6 +2,7 @@ package com.projet.housing.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
@@ -45,8 +47,10 @@ import com.projet.housing.service.MemberService;
 import com.projet.housing.service.MinisterService;
 import com.projet.housing.service.ReportService;
 
+import net.bytebuddy.implementation.bytecode.Throw;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 @RestController
 // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
@@ -169,23 +173,27 @@ public class MemberController {
     // https://www.techgeeknext.com/install-jasper-studio
     // resourceLocation = "classpath:employees-details.jrxml"
     @GetMapping("/report-liste-membre")
-    public ResponseEntity<?> viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister) {
+    public void viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister, HttpServletResponse response) {
         try{
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("nomPrenomP", "%"+nomPrenom+"%");
             parameters.put("sexeP", "%"+sexe+"%");
             parameters.put("ministerP", "%"+minister+"%");
-
-            JasperPrint report = reportService.getJasperPrint(memberService.listMember(), "classpath:member_list.jrxml", parameters);
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.setContentType(MediaType.APPLICATION_PDF);
-            httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=liste_des_membres.pdf");
-            // httpHeaders.setContentDispositionFormData("filename", "liste_des_membres.pdf");
-    
-            return new ResponseEntity<byte[]>(
-                JasperExportManager.exportReportToPdf(report), httpHeaders, HttpStatus.OK);
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(memberService.listMember());
+            // JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(memberService.listMember());
+            JasperPrint report = reportService.getJasperPrint(dataSource, memberService.listMember(), "classpath:member_list.jrxml", parameters);
+            // HttpHeaders httpHeaders = new HttpHeaders();
+            // httpHeaders.setContentType(MediaType.APPLICATION_PDF);
+            // httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=liste_des_membres.pdf");
+            // return new ResponseEntity<byte[]>(
+            //     JasperExportManager.exportReportToPdf(report), httpHeaders, HttpStatus.OK);
+            response.setContentType("application/x-download");
+            response.setHeader("Content-Disposition", String.format("attachment; filename=\"liste_des_membres.pdf\""));
+            OutputStream out = response.getOutputStream();
+            JasperExportManager.exportReportToPdfStream(report, out);
         }catch(Exception ex){
-            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+
+            // return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
         }
     }
 
