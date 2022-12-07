@@ -24,6 +24,10 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
+    public List<Member> listMember() {
+        return memberRepository.findAll();
+    }
+
     public Page<Member> getMembers(Pageable pageable) {
         return memberRepository.findAll(pageable);
     }
