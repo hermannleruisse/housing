@@ -48,6 +48,7 @@ import com.projet.housing.service.MinisterService;
 import com.projet.housing.service.ReportService;
 
 import net.bytebuddy.implementation.bytecode.Throw;
+import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
@@ -179,9 +180,8 @@ public class MemberController {
             parameters.put("nomPrenomP", "%"+nomPrenom+"%");
             parameters.put("sexeP", "%"+sexe+"%");
             parameters.put("ministerP", "%"+minister+"%");
-            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(memberService.listMember());
             // JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(memberService.listMember());
-            JasperPrint report = reportService.getJasperPrint(dataSource, memberService.listMember(), "classpath:member_list.jrxml", parameters);
+            JasperPrint report = reportService.getJasperPrint(new JREmptyDataSource(), memberService.listMember(), "classpath:member_list.jrxml", parameters);
             // HttpHeaders httpHeaders = new HttpHeaders();
             // httpHeaders.setContentType(MediaType.APPLICATION_PDF);
             // httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=liste_des_membres.pdf");
