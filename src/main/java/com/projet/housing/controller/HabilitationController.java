@@ -5,6 +5,7 @@
  */
 package com.projet.housing.controller;
 
+import com.projet.housing.db.UserRepository;
 import com.projet.housing.dto.CheckAuthorityDTO;
 import com.projet.housing.dto.HabilitationDTO;
 import com.projet.housing.dto.PermissionDTO;
@@ -50,6 +51,9 @@ public class HabilitationController {
 
     @Autowired
     private MenuService menuService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     /**
      * since 06/08/2021 retourne les menu pour les permissions
@@ -133,13 +137,15 @@ public class HabilitationController {
      * @param h
      * @return
      */
-    @PostMapping("/verifier-habilitation")
-    public ResponseEntity<?> checkAuthority(@RequestBody CheckAuthorityDTO h, Authentication authResult) {
+    // @PostMapping("/verifier-habilitation/{permission}")
+    @GetMapping("/verifier-habilitation/{permission}")
+    public ResponseEntity<?> checkAuthority(@PathVariable("permission") String permission, Authentication authResult) {
         Map<String, Object> check = new HashMap<>();
         UserPrincipal principal = (UserPrincipal) authResult.getPrincipal();
+        User u = userRepository.findByUsername(principal.getUsername());
         
-        Optional<Profile> p = profileService.getProfile(h.getProfile());
-        Optional<Permission> pm = permissionService.getPermissionByCode(h.getPermission());
+        Optional<Profile> p = profileService.getProfile(u.getProfile().getCode());
+        Optional<Permission> pm = permissionService.getPermissionByCode(permission);
         if(p.isPresent()){
             if(p.get().getPermissions().contains(pm.get())){
                 check.put("authorize", true);
