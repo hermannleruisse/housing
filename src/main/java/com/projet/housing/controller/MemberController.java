@@ -192,8 +192,7 @@ public class MemberController {
             OutputStream out = response.getOutputStream();
             JasperExportManager.exportReportToPdfStream(report, out);
         }catch(Exception ex){
-
-            // return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+            // return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -287,7 +286,8 @@ public class MemberController {
     public Page<Member> getSearchMultiCriteriaMembers(@PathVariable(name = "search", required = false) final String search, @RequestParam(defaultValue = "0") int page, 
     @RequestParam(defaultValue = "3") int size, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister) {
         Pageable paging = PageRequest.of(page, size);
-        return memberService.getSearchMembersMultiCriteria(search, sexe, minister, paging);
+        // return memberService.getSearchMembersMultiCriteria(search, sexe, minister, paging);
+        return memberService.findMembersByNomPrenomSexeAndMinister(search, sexe, minister, paging);
     }
     /**
      * Update - Update an existing member

@@ -10,6 +10,8 @@ import com.projet.housing.dto.HabilitationDTO;
 import com.projet.housing.dto.PermissionDTO;
 import com.projet.housing.model.Permission;
 import com.projet.housing.model.Profile;
+import com.projet.housing.model.User;
+import com.projet.housing.security.UserPrincipal;
 import com.projet.housing.service.MenuService;
 import com.projet.housing.service.PermissionService;
 import com.projet.housing.service.ProfileService;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -131,8 +134,10 @@ public class HabilitationController {
      * @return
      */
     @PostMapping("/verifier-habilitation")
-    public ResponseEntity<?> checkAuthority(@RequestBody CheckAuthorityDTO h) {
+    public ResponseEntity<?> checkAuthority(@RequestBody CheckAuthorityDTO h, Authentication authResult) {
         Map<String, Object> check = new HashMap<>();
+        UserPrincipal principal = (UserPrincipal) authResult.getPrincipal();
+        
         Optional<Profile> p = profileService.getProfile(h.getProfile());
         Optional<Permission> pm = permissionService.getPermissionByCode(h.getPermission());
         if(p.isPresent()){
