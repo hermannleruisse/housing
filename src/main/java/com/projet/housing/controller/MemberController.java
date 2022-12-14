@@ -27,6 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -297,7 +298,7 @@ public class MemberController {
      * @return
      * @throws IOException
      */
-    // @PreAuthorize("hasAuthority('PM_EDI_ME')")
+    @PreAuthorize("hasAuthority('PM_EDI_ME')")
     @PutMapping("/edit-member/{id}")
     public Member updateMember(@PathVariable("id") final String id, @Valid @RequestBody MemberDTO member) throws IOException {
         Optional<Member> e = memberService.getMember(id);

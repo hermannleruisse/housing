@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -137,12 +138,10 @@ public class HabilitationController {
      * @param h
      * @return
      */
-    // @PostMapping("/verifier-habilitation/{permission}")
-    @GetMapping("/verifier-habilitation/{permission}")
-    public ResponseEntity<?> checkAuthority(@PathVariable("permission") String permission, Authentication authResult) {
+    @PostMapping("/verifier-habilitation")
+    public ResponseEntity<?> checkAuthority(@RequestBody String permission, Authentication authResult) {
         Map<String, Object> check = new HashMap<>();
-        UserPrincipal principal = (UserPrincipal) authResult.getPrincipal();
-        User u = userRepository.findByUsername(principal.getUsername());
+        User u = userRepository.findByUsername(authResult.getPrincipal().toString());
         
         Optional<Profile> p = profileService.getProfile(u.getProfile().getCode());
         Optional<Permission> pm = permissionService.getPermissionByCode(permission);

@@ -46,7 +46,7 @@ public class MinisterController {
      * @param minister An object minister
      * @return The minister object saved
      */
-    // @PreAuthorize("hasAuthority('PM_ADD_MI')")
+    @PreAuthorize("hasAuthority('PM_ADD_MI')")
     @PostMapping("/save-minister")
     public Object createMinister(@Valid @RequestBody Minister minister) {
         Optional<Minister> p = this.ministerRepository.checkIfMinisterExistByCode(minister.getCode());
