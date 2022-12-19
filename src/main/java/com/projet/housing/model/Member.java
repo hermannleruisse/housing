@@ -1,5 +1,8 @@
 package com.projet.housing.model;
 
+import java.time.Instant;
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,6 +13,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 @Entity
 public class Member {
@@ -50,6 +55,13 @@ public class Member {
 
     @Column(nullable = false)
     private String photo;
+
+    @CreatedDate
+    private Date createdDate = new Date();
+
+    // https://www.section.io/engineering-education/spring-boot-jaspersoft-reports/
+    @LastModifiedDate
+    private Date lastModifiedDate;
 
     /**
      * @return String return the id
@@ -169,6 +181,37 @@ public class Member {
 
     public void setMinistere(Minister ministere) {
         this.ministere = ministere;
+    }
+
+    
+
+
+    /**
+     * @return Date return the createdDate
+     */
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    /**
+     * @param createdDate the createdDate to set
+     */
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    /**
+     * @return Date return the lastModifiedDate
+     */
+    public Date getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    /**
+     * @param lastModifiedDate the lastModifiedDate to set
+     */
+    public void setLastModifiedDate(Date lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
     }
 
 }

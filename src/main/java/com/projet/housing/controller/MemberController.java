@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -16,6 +19,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,6 +43,10 @@ import com.projet.housing.model.Member;
 import com.projet.housing.model.Minister;
 import com.projet.housing.service.MemberService;
 import com.projet.housing.service.MinisterService;
+import com.projet.housing.service.ReportService;
+
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperPrint;
 
 @RestController
 // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
@@ -55,6 +64,9 @@ public class MemberController {
 
     @Autowired
     private Environment environment;
+
+    @Autowired
+    private ReportService reportService;
 
     /**
      * Create - Add a new member
@@ -154,6 +166,29 @@ public class MemberController {
                 .body(resource);
     }
 
+    // https://www.techgeeknext.com/install-jasper-studio
+    // resourceLocation = "classpath:employees-details.jrxml"
+    @GetMapping("/report-liste-membre")
+    public ResponseEntity<?> viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister) {
+        try{
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("nomPrenomP", "%"+nomPrenom+"%");
+            parameters.put("sexeP", "%"+sexe+"%");
+            parameters.put("ministerP", "%"+minister+"%");
+
+            JasperPrint report = reportService.getJasperPrint(memberService.listMember(), "classpath:member_list.jrxml", parameters);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.setContentType(MediaType.APPLICATION_PDF);
+            httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=liste_des_membres.pdf");
+            // httpHeaders.setContentDispositionFormData("filename", "liste_des_membres.pdf");
+    
+            return new ResponseEntity<byte[]>(
+                JasperExportManager.exportReportToPdf(report), httpHeaders, HttpStatus.OK);
+        }catch(Exception ex){
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+    }
+
     @GetMapping("/downloadFile/{fileCode}")
     public ResponseEntity<?> downloadFile(@PathVariable("fileCode") String fileCode) {
 
@@ -203,14 +238,49 @@ public class MemberController {
         return memberService.getMembers();
     }
 
+    /**
+     * retourne la liste des membres ordonnés avec pagination 
+     * @param page
+     * @param size
+     * @return
+     */
     @GetMapping("/members-list")
     public Page<Member> getMembers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
         // Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
         //         : Sort.by(sortBy).descending();
-        Pageable paging = PageRequest.of(page, size);
+        Pageable paging = PageRequest.of(page, size, Sort.by("createdDate").descending().and(Sort.by("lastModifiedDate").descending()));
         return memberService.getMembers(paging);
     }
 
+    /**
+     * retourne la liste des membres en fonction du mot clé rechercher
+     * @param search
+     * @param page
+     * @param size
+     * @return
+     */
+    
+    @GetMapping("/search-members-list/{search}")
+    public Page<Member> getSearchMembers(@PathVariable("search") final String search, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
+        Pageable paging = PageRequest.of(page, size);
+        return memberService.getSearchMembers(search, paging);
+    }
+
+    /**
+     * retourne la liste des membres en fonction du mot clé rechercher, ministere, sexe
+     * @param search
+     * @param page
+     * @param size
+     * @param sexe
+     * @param minister
+     * @return
+     */
+    @GetMapping(value = {"/search-multi", "/search-multi/{search}"})
+    public Page<Member> getSearchMultiCriteriaMembers(@PathVariable(name = "search", required = false) final String search, @RequestParam(defaultValue = "0") int page, 
+    @RequestParam(defaultValue = "3") int size, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister) {
+        Pageable paging = PageRequest.of(page, size);
+        return memberService.getSearchMembersMultiCriteria(search, sexe, minister, paging);
+    }
     /**
      * Update - Update an existing member
      *
@@ -225,6 +295,7 @@ public class MemberController {
         Optional<Member> e = memberService.getMember(id);
         if (e.isPresent()) {
             Member currentMember = e.get();
+            currentMember.setLastModifiedDate(new Date());
 
             String membername = member.getNom();
             if (membername != null) {
