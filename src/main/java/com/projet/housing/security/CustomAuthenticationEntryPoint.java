@@ -13,20 +13,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-@Component
-@ControllerAdvice
-public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
+@Component("customAuthenticationEntryPoint")
+public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest arg0, HttpServletResponse response, AuthenticationException ex)
-            throws IOException, ServletException {
-                response.setContentType("application/json");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getOutputStream().println("{ \"error\": \"" + ex.getMessage() + "\" }");
-    }
-
-    @ExceptionHandler(value = { AccessDeniedException.class })
-    public void commence(HttpServletRequest arg0, HttpServletResponse response, AccessDeniedException ex)
             throws IOException, ServletException {
                 response.setContentType("application/json");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
