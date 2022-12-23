@@ -9,6 +9,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.projet.housing.dto.ApiError;
 import com.projet.housing.dto.LoginViewModel;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -91,9 +93,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        Map<String, Object> unsuccess = new HashMap<>();
-        unsuccess.put("msg", "Login ou mot de passe incorrect");
-        String unsuccessJsonString = this.gson.toJson(unsuccess);
+        // Map<String, Object> unsuccess = new HashMap<>();
+        // unsuccess.put("msg", "Login ou mot de passe incorrect");
+        final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Login ou mot de passe incorrect");
+        String unsuccessJsonString = this.gson.toJson(apiError);
         
         PrintWriter out = response.getWriter();
         response.setContentType("application/json");

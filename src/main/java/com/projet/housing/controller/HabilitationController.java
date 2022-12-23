@@ -6,13 +6,11 @@
 package com.projet.housing.controller;
 
 import com.projet.housing.db.UserRepository;
-import com.projet.housing.dto.CheckAuthorityDTO;
 import com.projet.housing.dto.HabilitationDTO;
 import com.projet.housing.dto.PermissionDTO;
 import com.projet.housing.model.Permission;
 import com.projet.housing.model.Profile;
 import com.projet.housing.model.User;
-import com.projet.housing.security.UserPrincipal;
 import com.projet.housing.service.MenuService;
 import com.projet.housing.service.PermissionService;
 import com.projet.housing.service.ProfileService;
@@ -32,7 +30,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**

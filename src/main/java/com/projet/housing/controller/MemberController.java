@@ -22,7 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,11 +47,9 @@ import com.projet.housing.service.MemberService;
 import com.projet.housing.service.MinisterService;
 import com.projet.housing.service.ReportService;
 
-import net.bytebuddy.implementation.bytecode.Throw;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 @RestController
 // @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
@@ -125,10 +122,6 @@ public class MemberController {
         
         String ext = member.getPhoto().split(";")[0].split("/")[1];
         String realName = member.getNom().concat(member.getPrenom()).concat(".").concat(ext);
-        
-        // String directory = servletContext.getRealPath("/")+"upload-file";
-        // new FileOutputStream(directory).write(decodedBytes);
-        System.out.println("chemin =>"+Paths.get("./upload-file").toAbsolutePath().normalize().toString());
         
         FileUtils.writeByteArrayToFile(
                 new File(Paths.get("./upload-file/").toAbsolutePath().normalize().toString(), realName),
@@ -254,8 +247,6 @@ public class MemberController {
      */
     @GetMapping("/members-list")
     public Page<Member> getMembers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
-        // Sort sort = sortDir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortBy).ascending()
-        //         : Sort.by(sortBy).descending();
         Pageable paging = PageRequest.of(page, size, Sort.by("createdDate").descending().and(Sort.by("lastModifiedDate").descending()));
         return memberService.getMembers(paging);
     }
@@ -287,7 +278,6 @@ public class MemberController {
     public Page<Member> getSearchMultiCriteriaMembers(@PathVariable(name = "search", required = false) final String search, @RequestParam(defaultValue = "0") int page, 
     @RequestParam(defaultValue = "3") int size, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister) {
         Pageable paging = PageRequest.of(page, size);
-        // return memberService.getSearchMembersMultiCriteria(search, sexe, minister, paging);
         return memberService.findMembersByNomPrenomSexeAndMinister(search, sexe, minister, paging);
     }
     /**

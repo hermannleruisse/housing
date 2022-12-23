@@ -15,9 +15,6 @@ import com.projet.housing.model.User;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -59,23 +56,36 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter{
 
         if (jwt.getExpiresAt().before(new Date())) {
             final ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, "Token expiré, veuillez-vous reconnecter !", "Token expiré, veuillez-vous reconnecter !");
-            String tokenExpireJsonString = new Gson().toJson(apiError);
+            String forbidenJsonString = new Gson().toJson(apiError);
 
             PrintWriter out = response.getWriter();
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            out.print(tokenExpireJsonString);
+            out.print(forbidenJsonString);
             out.flush();
-
-            
-            // chain.doFilter(request, response);
             return;
         }
+
+        
 
         //if header is present, try grab user principal from database and perform authorization
         Authentication authentication = getUsernamePasswordAuthentication(request);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        User user = userRepository.findByUsername(authentication.getPrincipal().toString());
+        if (!request.isUserInRole("ROLE_"+user.getProfile().getCode())) {
+            final ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, "Vous n'avez pas accès aux ressources de cette page !");
+            String tokenExpireJsonString = new Gson().toJson(apiError);
+
+            PrintWriter out = response.getWriter();
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            out.print(tokenExpireJsonString);
+            out.flush();
+            return;
+        }
         //continue filter execution
         chain.doFilter(request, response);
     }

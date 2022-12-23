@@ -174,7 +174,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         logger.info(ex.getClass().getName());
         logger.error("error", ex);
         
-        final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage(), "error occurred");
+        final ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage().concat(" Une erreur s'est produite lors de l'opération"));
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
@@ -183,19 +183,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         logger.info(ex.getClass().getName());
         logger.error("error", ex);
         
-        final ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, ex.getLocalizedMessage(), "Vous n'avez pas l'autorisation pour éffectuer cette action");
+        final ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, "Vous n'avez pas l'autorisation pour éffectuer cette action");
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }
-
-    @ExceptionHandler({ TokenExpiredException.class, AlgorithmMismatchException.class, SignatureVerificationException.class,
-        InvalidClaimException.class, JWTVerificationException.class })
-    public ResponseEntity<Object> handleJWTVerification(final Exception ex, final WebRequest request) {
-        logger.info(ex.getClass().getName());
-        logger.error("error", ex);
-        
-        final ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, ex.getLocalizedMessage(), "Token expiré");
-        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-    }
-
-    
 }
