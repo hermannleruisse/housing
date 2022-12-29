@@ -27,7 +27,7 @@ import com.projet.housing.model.Minister;
 import com.projet.housing.service.MinisterService;
 
 @RestController
-@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+// @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
 @RequestMapping("/api/manager")
 @CrossOrigin
 public class MinisterController {

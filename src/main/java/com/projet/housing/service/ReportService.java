@@ -22,7 +22,7 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 @Service
 public class ReportService {
 
-    public JasperPrint getJasperPrint(JRDataSource jrDataSource,List<Member> list, String resourceLocation, Map<String, Object> parameters) throws FileNotFoundException, JRException {
+    public JasperPrint getJasperPrint(JRDataSource jrDataSource, List<Member> list, String resourceLocation, Map<String, Object> parameters) throws FileNotFoundException, JRException {
         File file = ResourceUtils.getFile(resourceLocation);
         JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
         // JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(list);

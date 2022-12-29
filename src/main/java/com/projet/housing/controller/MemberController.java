@@ -2,7 +2,7 @@ package com.projet.housing.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -45,14 +46,15 @@ import com.projet.housing.model.Member;
 import com.projet.housing.model.Minister;
 import com.projet.housing.service.MemberService;
 import com.projet.housing.service.MinisterService;
-import com.projet.housing.service.ReportService;
-
 import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRLoader;
 
 @RestController
-// @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MANAGER')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 @RequestMapping("/api/manager")
 @CrossOrigin
 public class MemberController {
@@ -67,9 +69,6 @@ public class MemberController {
 
     @Autowired
     private Environment environment;
-
-    @Autowired
-    private ReportService reportService;
 
     /**
      * Create - Add a new member
@@ -168,25 +167,29 @@ public class MemberController {
     // https://www.techgeeknext.com/install-jasper-studio
     // resourceLocation = "classpath:employees-details.jrxml"
     @GetMapping("/report-liste-membre")
-    public void viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister, HttpServletResponse response) {
+    public void viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister, HttpServletResponse response) throws Exception {
         try{
+            //compiled report
+            InputStream jasperStream = (InputStream) this.getClass().getResourceAsStream("/member_list.jrxml");
+            
+            //adding attributes
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("nomPrenomP", "%"+nomPrenom+"%");
             parameters.put("sexeP", "%"+sexe+"%");
             parameters.put("ministerP", "%"+minister+"%");
+
             // JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(memberService.listMember());
-            JasperPrint report = reportService.getJasperPrint(new JREmptyDataSource(), memberService.listMember(), "classpath:member_list.jrxml", parameters);
-            // HttpHeaders httpHeaders = new HttpHeaders();
-            // httpHeaders.setContentType(MediaType.APPLICATION_PDF);
-            // httpHeaders.add(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=liste_des_membres.pdf");
-            // return new ResponseEntity<byte[]>(
-            //     JasperExportManager.exportReportToPdf(report), httpHeaders, HttpStatus.OK);
-            response.setContentType("application/x-download");
-            response.setHeader("Content-Disposition", String.format("attachment; filename=\"liste_des_membres.pdf\""));
-            OutputStream out = response.getOutputStream();
-            JasperExportManager.exportReportToPdfStream(report, out);
+            // JasperPrint report = reportService.getJasperPrint(new JREmptyDataSource(), memberService.listMember(), "classpath:member_list.jrxml", parameters);
+            JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+            
+            response.setContentType("application/x-pdf");
+            response.setHeader("Content-disposition", "inline; filename=liste_des_membres.pdf");
+
+            final ServletOutputStream outputStream = response.getOutputStream();
+            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
         }catch(Exception ex){
-            // return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+            throw new Exception(ex.getMessage()+"Une erreur s'est produite lors du télechargement du fichier !");
         }
     }
 
