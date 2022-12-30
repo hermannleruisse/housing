@@ -46,15 +46,15 @@ import com.projet.housing.model.Member;
 import com.projet.housing.model.Minister;
 import com.projet.housing.service.MemberService;
 import com.projet.housing.service.MinisterService;
-import net.sf.jasperreports.engine.JREmptyDataSource;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
 
 @RestController
-@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+// @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
 @RequestMapping("/api/manager")
 @CrossOrigin
 public class MemberController {
@@ -77,7 +77,7 @@ public class MemberController {
      * @return The member object saved
      * @throws IOException
      */
-    // @PreAuthorize("hasAuthority('PM_ADD_ME')")
+    @PreAuthorize("hasAuthority('PM_ADD_ME') or hasRole('ADMIN')")
     @PostMapping("/save-member")
     public Object createMember(@Valid @RequestBody MemberDTO member) throws IOException {
         Optional<Member> us = mRepository.checkIfMemberExistByNomAndPrenom(member.getNom(), member.getPrenom());
@@ -166,22 +166,23 @@ public class MemberController {
 
     // https://www.techgeeknext.com/install-jasper-studio
     // resourceLocation = "classpath:employees-details.jrxml"
-    @GetMapping("/report-liste-membre")
+    @PreAuthorize("hasAuthority('PM_ETA_ME') or hasRole('ADMIN')")
+    @RequestMapping("/report-liste-membre")
     public void viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister, HttpServletResponse response) throws Exception {
         try{
             //compiled report
-            InputStream jasperStream = (InputStream) this.getClass().getResourceAsStream("/member_list.jrxml");
+            InputStream jasperStream = (InputStream) this.getClass().getResourceAsStream("/member_list.jasper");
             
             //adding attributes
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put("nomPrenomP", "%"+nomPrenom+"%");
-            parameters.put("sexeP", "%"+sexe+"%");
-            parameters.put("ministerP", "%"+minister+"%");
+            parameters.put("nomPrenomP", nomPrenom);
+            parameters.put("sexeP", sexe);
+            parameters.put("ministerP", minister);
 
-            // JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(memberService.listMember());
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(memberService.getSearchMembersForPrint(nomPrenom, sexe, minister));
             // JasperPrint report = reportService.getJasperPrint(new JREmptyDataSource(), memberService.listMember(), "classpath:member_list.jrxml", parameters);
             JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
-            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, new JREmptyDataSource());
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
             
             response.setContentType("application/x-pdf");
             response.setHeader("Content-disposition", "inline; filename=liste_des_membres.pdf");
@@ -222,6 +223,7 @@ public class MemberController {
      * @param id The id of the member
      * @return An Member object full filled
      */
+    @PreAuthorize("hasAuthority('PM_EDI_ME') or hasRole('ADMIN')")
     @GetMapping("/member/{id}")
     public Member getMember(@PathVariable("id") final String id) {
         Optional<Member> member = memberService.getMember(id);
@@ -291,7 +293,7 @@ public class MemberController {
      * @return
      * @throws IOException
      */
-    @PreAuthorize("hasAuthority('PM_EDI_ME')")
+    @PreAuthorize("hasAuthority('PM_EDI_ME') or hasRole('ADMIN')")
     @PutMapping("/edit-member/{id}")
     public Member updateMember(@PathVariable("id") final String id, @Valid @RequestBody MemberDTO member) throws IOException {
         Optional<Member> e = memberService.getMember(id);
@@ -345,7 +347,7 @@ public class MemberController {
      *
      * @param id - The id of the member to delete
      */
-    // @PreAuthorize("hasAuthority('PM_DEL_ME')")
+    @PreAuthorize("hasAuthority('PM_DEL_ME') or hasRole('ADMIN')")
     @DeleteMapping("/delete-member/{id}")
     public void deleteMember(@PathVariable("id") final String id) {
         

@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 @RestController
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 @RequestMapping("/api/security")
 @CrossOrigin
 public class ProfileController {
@@ -93,7 +94,6 @@ public class ProfileController {
      *
      * @return - An Iterable object of Profile full filled
      */
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/profiles")
     public Iterable<Profile> getProfiles() {
         return profileService.getProfiles();

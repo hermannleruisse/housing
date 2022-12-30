@@ -23,6 +23,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,9 +50,6 @@ public class HabilitationController {
 
     @Autowired
     private MenuService menuService;
-
-    @Autowired
-    private UserRepository userRepository;
 
     /**
      * since 06/08/2021 retourne les menu pour les permissions
@@ -106,6 +104,7 @@ public class HabilitationController {
      * @param h
      * @return
      */
+    @PreAuthorize("hasAuthority('PM_EDI_H')")
     @PostMapping("save-habilitation")
     public ResponseEntity<?> saveHabilitation(@RequestBody HabilitationDTO h) {
         System.out.println("HabilitationDTO "+h.toString());
@@ -128,28 +127,5 @@ public class HabilitationController {
             profileService.saveProfile(currentProfile);
         }
         return ResponseEntity.ok(h);
-    }
-
-    /**
-     * vérification de l'habilitation
-     * @param h
-     * @return
-     */
-    @PostMapping("/verifier-habilitation")
-    public ResponseEntity<?> checkAuthority(@RequestBody String permission, Authentication authResult) {
-        Map<String, Object> check = new HashMap<>();
-        User u = userRepository.findByUsername(authResult.getPrincipal().toString());
-        
-        Optional<Profile> p = profileService.getProfile(u.getProfile().getCode());
-        Optional<Permission> pm = permissionService.getPermissionByCode(permission);
-        if(p.isPresent()){
-            if(p.get().getPermissions().contains(pm.get())){
-                check.put("authorize", true);
-                return ResponseEntity.ok(check);
-            }
-        }
-        
-        check.put("authorize", false);
-        return ResponseEntity.ok(check);
     }
 }

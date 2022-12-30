@@ -46,7 +46,7 @@ public class MinisterController {
      * @param minister An object minister
      * @return The minister object saved
      */
-    @PreAuthorize("hasAuthority('PM_ADD_MI')")
+    @PreAuthorize("hasAuthority('PM_ADD_MI') or hasRole('ADMIN')")
     @PostMapping("/save-minister")
     public Object createMinister(@Valid @RequestBody Minister minister) {
         Optional<Minister> p = this.ministerRepository.checkIfMinisterExistByCode(minister.getCode());
@@ -64,6 +64,7 @@ public class MinisterController {
      * @param id The id of the minister
      * @return An Minister object full filled
      */
+    @PreAuthorize("hasAuthority('PM_EDI_MI') or hasRole('ADMIN')")
     @GetMapping("/minister/{id}")
     public Minister getMinister(@PathVariable("id") final String id) {
         Optional<Minister> minister = ministerService.getMinister(id);
@@ -91,7 +92,7 @@ public class MinisterController {
      * @param minister - The minister object updated
      * @return
      */
-    // @PreAuthorize("hasAuthority('PM_EDI_MI')")
+    @PreAuthorize("hasAuthority('PM_EDI_MI') or hasRole('ADMIN')")
     @PutMapping("/edit-minister/{id}")
     public Minister updateMinister(@PathVariable("id") final String id, @Valid @RequestBody MinisterDTO minister) {
         Optional<Minister> e = ministerService.getMinister(id);
@@ -123,7 +124,7 @@ public class MinisterController {
      *
      * @param id - The id of the minister to delete
      */
-    // @PreAuthorize("hasAuthority('PM_DEL_MI')")
+    @PreAuthorize("hasAuthority('PM_DEL_MI') or hasRole('ADMIN')")
     @DeleteMapping("/delete-minister/{id}")
     public void deleteMinister(@PathVariable("id") final String id) {
         ministerService.deleteMinister(id);

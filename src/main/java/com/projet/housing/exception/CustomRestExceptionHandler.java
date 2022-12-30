@@ -26,7 +26,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.client.HttpClientErrorException.Forbidden;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
@@ -183,12 +183,4 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    @ExceptionHandler({ Forbidden.class })
-    public ResponseEntity<Object> handleAccessDeniedPage(final Exception ex, final WebRequest request) {
-        logger.info(ex.getClass().getName());
-        logger.error("error", ex);
-        
-        final ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, "Vous n'avez pas l'autorisation pour éffectuer cette action");
-        return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
-    }
 }

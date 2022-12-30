@@ -115,7 +115,7 @@ public class MemberService {
 
         if(sexe.isEmpty()) sexe = null;
         if(minister.isEmpty()) minister = null;
-        if(nomPrenom.isEmpty()) nomPrenom = null;
+        //if(nomPrenom.isEmpty()) nomPrenom = null;
         
         if (sexe != null) {
             predicates.add(cb.equal(memb.get("sexe"), sexe));

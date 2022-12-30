@@ -60,7 +60,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 // configure access rules
                 .antMatchers("/login").permitAll()
                 .antMatchers("/api/security/*").hasRole("ADMIN")
-                .antMatchers("/api/manager/*").hasRole("MANAGER")
+                .antMatchers("/api/manager/*").hasAnyRole("ADMIN", "MANAGER")
                 .and()
                 .exceptionHandling()
                 .accessDeniedHandler(new CustomAccessDeniedHandler())

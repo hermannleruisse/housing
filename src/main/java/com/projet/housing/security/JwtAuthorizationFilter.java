@@ -73,22 +73,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter{
         Authentication authentication = getUsernamePasswordAuthentication(request);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User user = userRepository.findByUsername(authentication.getPrincipal().toString());
-        
-        System.out.println("ROLE => "+authentication.getAuthorities());
-        System.out.println("ROLE CHECK => "+authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(user.getRole())));
-        if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(user.getRole())) == false) {
-            final ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, "Vous n'avez pas accès aux ressources de cette page !");
-            String tokenExpireJsonString = new Gson().toJson(apiError);
-
-            PrintWriter out = response.getWriter();
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            out.print(tokenExpireJsonString);
-            out.flush();
-            return;
-        }
         //continue filter execution
         chain.doFilter(request, response);
     }

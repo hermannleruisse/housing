@@ -17,7 +17,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException ex)
             throws IOException, ServletException {
         response.addHeader("access_denied_reason", "authentication_required");
-        response.sendError(403, "Access Denied");
+        response.sendError(403, "Veuillez vous connectez pour avoir accès aux ressources !");
     }
     
 }

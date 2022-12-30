@@ -17,7 +17,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException exc)
             throws IOException, ServletException {
         response.addHeader("access_denied_reason", "not_authorized");
-        response.sendError(403, "Access Denied");
+        response.sendError(403, "Vous n'avez pas accès aux ressources de cette page !");
     }
     
 }
