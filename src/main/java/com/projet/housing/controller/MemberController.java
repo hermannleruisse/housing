@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Date;
@@ -19,6 +20,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -168,7 +170,7 @@ public class MemberController {
     // resourceLocation = "classpath:employees-details.jrxml"
     @PreAuthorize("hasAuthority('PM_ETA_ME') or hasRole('ADMIN')")
     @RequestMapping("/report-liste-membre")
-    public void viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister, HttpServletResponse response) throws Exception {
+    public ResponseEntity<Resource> viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister, HttpServletResponse response) throws Exception {
         try{
             //compiled report
             InputStream jasperStream = (InputStream) this.getClass().getResourceAsStream("/member_list.jasper");
@@ -183,12 +185,26 @@ public class MemberController {
             // JasperPrint report = reportService.getJasperPrint(new JREmptyDataSource(), memberService.listMember(), "classpath:member_list.jrxml", parameters);
             JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
-            
-            response.setContentType("application/x-pdf");
-            response.setHeader("Content-disposition", "inline; filename=liste_des_membres.pdf");
 
-            final ServletOutputStream outputStream = response.getOutputStream();
-            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+            JasperExportManager.exportReportToPdfFile(jasperPrint, "./etat/member_list.pdf");
+
+            Path fileStorageLocation = Paths.get("./etat").toAbsolutePath().normalize();
+            Path filePath = fileStorageLocation.resolve("member_list.pdf").normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+            // byte[] isr = Files.readAllBytes(filePath);
+
+            // HttpHeaders respHeaders = new HttpHeaders();
+		    // respHeaders.setContentLength(isr.length);
+		    // respHeaders.setContentType(MediaType.APPLICATION_PDF);
+		    // respHeaders.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+		    // respHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + resource.getFilename());
+
+            // return new ResponseEntity<byte[]>(isr, respHeaders, HttpStatus.OK);
+
+            return ResponseEntity.ok()
+                             .header(HttpHeaders.CONTENT_TYPE, "application/pdf")
+                             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                             .body(resource);
         }catch(Exception ex){
             throw new Exception(ex.getMessage()+"Une erreur s'est produite lors du télechargement du fichier !");
         }
