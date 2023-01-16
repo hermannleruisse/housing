@@ -25,11 +25,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +50,9 @@ import com.projet.housing.model.Member;
 import com.projet.housing.model.Minister;
 import com.projet.housing.service.MemberService;
 import com.projet.housing.service.MinisterService;
+
+import net.sf.jasperreports.engine.JREmptyDataSource;
+import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -90,13 +95,15 @@ public class MemberController {
         } else {
 
             // String realName = member.getNom().concat(member.getPrenom());
-            // byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto().split(",")[1]);
+            // byte[] decodedBytes =
+            // Base64.getDecoder().decode(member.getPhoto().split(",")[1]);
 
             // String ext = member.getPhoto().split(";")[0].split("/")[1];
 
             // FileUtils.writeByteArrayToFile(
-            //         new File(resourceLoader.getResource("/upload-file/").getURL() + realName.concat(".").concat(ext)),
-            //         decodedBytes, true);
+            // new File(resourceLoader.getResource("/upload-file/").getURL() +
+            // realName.concat(".").concat(ext)),
+            // decodedBytes, true);
             String photoName = base64ToImage(member);
             Optional<Minister> minister = ministerService.getMinister(member.getMinistere());
 
@@ -120,10 +127,10 @@ public class MemberController {
      */
     private String base64ToImage(MemberDTO member) throws IOException {
         byte[] decodedBytes = Base64.getDecoder().decode(member.getPhoto().split(",")[1]);
-        
+
         String ext = member.getPhoto().split(";")[0].split("/")[1];
         String realName = member.getNom().concat(member.getPrenom()).concat(".").concat(ext);
-        
+
         FileUtils.writeByteArrayToFile(
                 new File(Paths.get("./upload-file/").toAbsolutePath().normalize().toString(), realName),
                 decodedBytes, true);
@@ -134,7 +141,7 @@ public class MemberController {
      * @param fileName
      * @return
      */
-    private boolean deleteFile(String fileName){
+    private boolean deleteFile(String fileName) {
         try {
             Files.delete(Paths.get("/.upload-file/" + fileName));
         } catch (IOException e) {
@@ -168,21 +175,26 @@ public class MemberController {
 
     // https://www.techgeeknext.com/install-jasper-studio
     // resourceLocation = "classpath:employees-details.jrxml"
+    // https://www.techgeeknext.com/spring-boot/spring-boot-jasper-report
     @PreAuthorize("hasAuthority('PM_ETA_ME') or hasRole('ADMIN')")
     @RequestMapping("/report-liste-membre")
-    public ResponseEntity<Resource> viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister, HttpServletResponse response) throws Exception {
-        try{
-            //compiled report
+    public ResponseEntity<Resource> viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom,
+            @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister,
+            HttpServletResponse response) throws Exception {
+        try {
+            // compiled report
             InputStream jasperStream = (InputStream) this.getClass().getResourceAsStream("/member_list.jasper");
-            
-            //adding attributes
+
+            // adding attributes
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("nomPrenomP", nomPrenom);
             parameters.put("sexeP", sexe);
             parameters.put("ministerP", minister);
 
-            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(memberService.getSearchMembersForPrint(nomPrenom, sexe, minister));
-            // JasperPrint report = reportService.getJasperPrint(new JREmptyDataSource(), memberService.listMember(), "classpath:member_list.jrxml", parameters);
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(
+                    memberService.getSearchMembersForPrint(nomPrenom, sexe, minister));
+            // JasperPrint report = reportService.getJasperPrint(new JREmptyDataSource(),
+            // memberService.listMember(), "classpath:member_list.jrxml", parameters);
             JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
             JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
 
@@ -194,20 +206,68 @@ public class MemberController {
             // byte[] isr = Files.readAllBytes(filePath);
 
             // HttpHeaders respHeaders = new HttpHeaders();
-		    // respHeaders.setContentLength(isr.length);
-		    // respHeaders.setContentType(MediaType.APPLICATION_PDF);
-		    // respHeaders.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-		    // respHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + resource.getFilename());
+            // respHeaders.setContentLength(isr.length);
+            // respHeaders.setContentType(MediaType.APPLICATION_PDF);
+            // respHeaders.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+            // respHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" +
+            // resource.getFilename());
 
             // return new ResponseEntity<byte[]>(isr, respHeaders, HttpStatus.OK);
 
             return ResponseEntity.ok()
-                             .header(HttpHeaders.CONTENT_TYPE, "application/pdf")
-                             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                             .body(resource);
-        }catch(Exception ex){
-            throw new Exception(ex.getMessage()+"Une erreur s'est produite lors du télechargement du fichier !");
+                    .contentType(MediaType.parseMediaType("application/octet-stream"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+        } catch (Exception ex) {
+            throw new Exception(ex.getMessage() + "Une erreur s'est produite lors du télechargement du fichier !");
         }
+    }
+
+    @PreAuthorize("hasAuthority('PM_ETA_ME') or hasRole('ADMIN')")
+    @RequestMapping("/report-liste-membre_")
+    public ResponseEntity<byte[]> viewReportAllMember1(@RequestParam(defaultValue = "") String nomPrenom,
+            @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister,
+            HttpServletResponse response) throws Exception {
+        try {
+            // adding attributes
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("nomPrenomP", nomPrenom);
+            parameters.put("sexeP", sexe);
+            parameters.put("ministerP", minister);
+            parameters.put("memberData", new JRBeanCollectionDataSource(memberService.getSearchMembersForPrint(nomPrenom, sexe, minister)));
+
+            JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(
+                    memberService.getSearchMembersForPrint(nomPrenom, sexe, minister));
+            // JasperPrint report = reportService.getJasperPrint(new JREmptyDataSource(),
+            // memberService.listMember(), "classpath:member_list.jrxml", parameters);
+            JasperPrint memberReport = JasperFillManager.fillReport(
+                    JasperCompileManager.compileReport(
+                            ResourceUtils.getFile("classpath:member_list.jrxml")
+                                    .getAbsolutePath()) // path of the jasper report
+                    , parameters // dynamic parameters
+                    , new JREmptyDataSource());
+
+            HttpHeaders headers = new HttpHeaders();
+            // set the PDF format
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("filename", "member_list.pdf");
+
+            // create the report in PDF format
+            return new ResponseEntity<byte[]>(JasperExportManager.exportReportToPdf(memberReport), headers,
+                    HttpStatus.OK);
+
+        } catch (Exception ex) {
+            return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping(value = "/demo-file-download")
+    public ResponseEntity<byte[]> demo() { // (1) Return byte array response
+        String demoContent = "This is dynamically generated content in demo file"; // (2) Dynamic content
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE); // (3) Content-Type: application/octet-stream
+        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename("demo-file.txt").build().toString()); // (4) Content-Disposition: attachment; filename="demo-file.txt"
+        return ResponseEntity.ok().headers(httpHeaders).body(demoContent.getBytes()); // (5) Return Response
     }
 
     @GetMapping("/downloadFile/{fileCode}")
@@ -261,33 +321,40 @@ public class MemberController {
     }
 
     /**
-     * retourne la liste des membres ordonnés avec pagination 
+     * retourne la liste des membres ordonnés avec pagination
+     * 
      * @param page
      * @param size
      * @return
      */
     @GetMapping("/members-list")
-    public Page<Member> getMembers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
-        Pageable paging = PageRequest.of(page, size, Sort.by("createdDate").descending().and(Sort.by("lastModifiedDate").descending()));
+    public Page<Member> getMembers(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size) {
+        Pageable paging = PageRequest.of(page, size,
+                Sort.by("createdDate").descending().and(Sort.by("lastModifiedDate").descending()));
         return memberService.getMembers(paging);
     }
 
     /**
      * retourne la liste des membres en fonction du mot clé rechercher
+     * 
      * @param search
      * @param page
      * @param size
      * @return
      */
-    
+
     @GetMapping("/search-members-list/{search}")
-    public Page<Member> getSearchMembers(@PathVariable("search") final String search, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
+    public Page<Member> getSearchMembers(@PathVariable("search") final String search,
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "3") int size) {
         Pageable paging = PageRequest.of(page, size);
         return memberService.getSearchMembers(search, paging);
     }
 
     /**
-     * retourne la liste des membres en fonction du mot clé rechercher, ministere, sexe
+     * retourne la liste des membres en fonction du mot clé rechercher, ministere,
+     * sexe
+     * 
      * @param search
      * @param page
      * @param size
@@ -295,12 +362,16 @@ public class MemberController {
      * @param minister
      * @return
      */
-    @GetMapping(value = {"/search-multi", "/search-multi/{search}"})
-    public Page<Member> getSearchMultiCriteriaMembers(@PathVariable(name = "search", required = false) final String search, @RequestParam(defaultValue = "0") int page, 
-    @RequestParam(defaultValue = "3") int size, @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister) {
+    @GetMapping(value = { "/search-multi", "/search-multi/{search}" })
+    public Page<Member> getSearchMultiCriteriaMembers(
+            @PathVariable(name = "search", required = false) final String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size, @RequestParam(defaultValue = "") String sexe,
+            @RequestParam(defaultValue = "") String minister) {
         Pageable paging = PageRequest.of(page, size);
         return memberService.findMembersByNomPrenomSexeAndMinister(search, sexe, minister, paging);
     }
+
     /**
      * Update - Update an existing member
      *
@@ -311,7 +382,8 @@ public class MemberController {
      */
     @PreAuthorize("hasAuthority('PM_EDI_ME') or hasRole('ADMIN')")
     @PutMapping("/edit-member/{id}")
-    public Member updateMember(@PathVariable("id") final String id, @Valid @RequestBody MemberDTO member) throws IOException {
+    public Member updateMember(@PathVariable("id") final String id, @Valid @RequestBody MemberDTO member)
+            throws IOException {
         Optional<Member> e = memberService.getMember(id);
         if (e.isPresent()) {
             Member currentMember = e.get();
@@ -366,14 +438,14 @@ public class MemberController {
     @PreAuthorize("hasAuthority('PM_DEL_ME') or hasRole('ADMIN')")
     @DeleteMapping("/delete-member/{id}")
     public void deleteMember(@PathVariable("id") final String id) {
-        
+
         Optional<Member> e = memberService.getMember(id);
         if (e.isPresent()) {
             Member currentMember = e.get();
             // suppression du fichier physique
             deleteFile(currentMember.getPhoto());
         }
-        
+
         memberService.deleteMember(id);
     }
 
