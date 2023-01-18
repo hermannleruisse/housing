@@ -177,7 +177,7 @@ public class MemberController {
     // resourceLocation = "classpath:employees-details.jrxml"
     // https://www.techgeeknext.com/spring-boot/spring-boot-jasper-report
     @PreAuthorize("hasAuthority('PM_ETA_ME') or hasRole('ADMIN')")
-    @RequestMapping("/report-liste-membre")
+    @RequestMapping("/report-liste-membre_")
     public ResponseEntity<Resource> viewReportAllMember(@RequestParam(defaultValue = "") String nomPrenom,
             @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister,
             HttpServletResponse response) throws Exception {
@@ -224,7 +224,7 @@ public class MemberController {
     }
 
     @PreAuthorize("hasAuthority('PM_ETA_ME') or hasRole('ADMIN')")
-    @RequestMapping("/report-liste-membre_")
+    @RequestMapping("/report-liste-membre")
     public ResponseEntity<byte[]> viewReportAllMember1(@RequestParam(defaultValue = "") String nomPrenom,
             @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister,
             HttpServletResponse response) throws Exception {
@@ -234,7 +234,7 @@ public class MemberController {
             parameters.put("nomPrenomP", nomPrenom);
             parameters.put("sexeP", sexe);
             parameters.put("ministerP", minister);
-            parameters.put("memberData", new JRBeanCollectionDataSource(memberService.getSearchMembersForPrint(nomPrenom, sexe, minister)));
+            // parameters.put("memberData", new JRBeanCollectionDataSource(memberService.getSearchMembersForPrint(nomPrenom, sexe, minister)));
 
             JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(
                     memberService.getSearchMembersForPrint(nomPrenom, sexe, minister));
@@ -245,7 +245,7 @@ public class MemberController {
                             ResourceUtils.getFile("classpath:member_list.jrxml")
                                     .getAbsolutePath()) // path of the jasper report
                     , parameters // dynamic parameters
-                    , new JREmptyDataSource());
+                    , dataSource);
 
             HttpHeaders headers = new HttpHeaders();
             // set the PDF format
@@ -257,7 +257,7 @@ public class MemberController {
                     HttpStatus.OK);
 
         } catch (Exception ex) {
-            return new ResponseEntity<byte[]>(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new Exception(ex.getMessage() + "Une erreur s'est produite lors du télechargement du fichier !");
         }
     }
 
