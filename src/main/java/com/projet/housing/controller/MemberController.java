@@ -11,8 +11,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -238,13 +236,12 @@ public class MemberController {
 
             JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(
                     memberService.getSearchMembersForPrint(nomPrenom, sexe, minister));
-            // JasperPrint report = reportService.getJasperPrint(new JREmptyDataSource(),
-            // memberService.listMember(), "classpath:member_list.jrxml", parameters);
+           
             JasperPrint memberReport = JasperFillManager.fillReport(
                     JasperCompileManager.compileReport(
                             ResourceUtils.getFile("classpath:member_list.jrxml")
                                     .getAbsolutePath()) // path of the jasper report
-                    , parameters // dynamic parameters
+                    , null // dynamic parameters
                     , dataSource);
 
             HttpHeaders headers = new HttpHeaders();
@@ -264,22 +261,20 @@ public class MemberController {
     // https://www.tutorialspoint.com/jasper_reports/jasper_report_parameters.htm#
     // https://milangadajaspersoft.blogspot.com/2018/10/inserting-image-in-jasper-report.html
     @PreAuthorize("hasAuthority('PM_ETA_ME') or hasRole('ADMIN')")
-    @RequestMapping("/report-liste-membre")
+    @RequestMapping("/report-liste-membre__")
     public ResponseEntity<byte[]> viewReportAllMember2(@RequestParam(defaultValue = "") String nomPrenom,
             @RequestParam(defaultValue = "") String sexe, @RequestParam(defaultValue = "") String minister,
             HttpServletResponse response) throws Exception {
         try {
             //string builder
-            StringBuilder strQuery = new StringBuilder();
+            String strQuery = "";
+            strQuery = " m.nom LIKE '%"+nomPrenom+"%' AND m.prenom LIKE '%"+nomPrenom+"%'" ;
             
-            // if (nomPrenom != null) {
-                strQuery.append(" m.nom LIKE %"+nomPrenom+"% AND m.prenom LIKE %"+nomPrenom+"%");
-            // }
-            if (sexe != null) {
-                strQuery.append(" AND m.sexe = '"+sexe+"'");
+            if (sexe.length() > 0) {
+                strQuery += " AND m.sexe = '"+sexe+"'";
             }
-            if (minister != null) {
-                strQuery.append(" AND m.ministere_id = '"+minister+"'");
+            if (minister.length() > 0) {
+                strQuery += " AND m.ministere_id = '"+minister+"'";
             }
             // adding attributes
             Map<String, Object> parameters = new HashMap<>();
@@ -312,15 +307,6 @@ public class MemberController {
         } catch (Exception ex) {
             throw new Exception(ex.getMessage() + "Une erreur s'est produite lors du télechargement du fichier !");
         }
-    }
-
-    @GetMapping(value = "/demo-file-download")
-    public ResponseEntity<byte[]> demo() { // (1) Return byte array response
-        String demoContent = "This is dynamically generated content in demo file"; // (2) Dynamic content
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE); // (3) Content-Type: application/octet-stream
-        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename("demo-file.txt").build().toString()); // (4) Content-Disposition: attachment; filename="demo-file.txt"
-        return ResponseEntity.ok().headers(httpHeaders).body(demoContent.getBytes()); // (5) Return Response
     }
 
     @GetMapping("/downloadFile/{fileCode}")
