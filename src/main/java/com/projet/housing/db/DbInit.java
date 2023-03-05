@@ -62,8 +62,8 @@ public class DbInit implements CommandLineRunner {
         this.menuRepository.saveAll(menus);
         //habilitation
         Permission pm1 = new Permission("PM_EDI_H", "Modifier", m1);
-        Permission pm2 = new Permission("PM_ADD_H", "Ajouter", m1);
-        Permission pm3 = new Permission("PM_DEL_H", "Supprimer", m1);
+        // Permission pm2 = new Permission("PM_ADD_H", "Ajouter", m1);
+        // Permission pm3 = new Permission("PM_DEL_H", "Supprimer", m1);
         //utilisateur
         Permission pm4 = new Permission("PM_EDI_U", "Modifier", m2);
         Permission pm5 = new Permission("PM_ADD_U", "Ajouter", m2);
@@ -81,9 +81,10 @@ public class DbInit implements CommandLineRunner {
         Permission pm14 = new Permission("PM_ADD_ME", "Ajouter", m5);
         Permission pm15 = new Permission("PM_DEL_ME", "Supprimer", m5);
         Permission pm16 = new Permission("PM_DET_ME", "Détails", m5);
+        Permission pm17 = new Permission("PM_ETA_ME", "Imprimer", m5);
         
-        List<Permission> permissions = Arrays.asList(pm1, pm2, pm3, pm4, pm5, pm6, pm7, pm8, pm9, pm10, pm11, pm12,
-        pm13, pm14, pm15, pm16);
+        List<Permission> permissions = Arrays.asList(pm1, pm4, pm5, pm6, pm7, pm8, pm9, pm10, pm11, pm12,
+        pm13, pm14, pm15, pm16, pm17);
 
         this.permissionRepository.saveAll(permissions);
 

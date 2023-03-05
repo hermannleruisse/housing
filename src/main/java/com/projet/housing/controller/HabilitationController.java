@@ -5,11 +5,12 @@
  */
 package com.projet.housing.controller;
 
-import com.projet.housing.dto.CheckAuthorityDTO;
+import com.projet.housing.db.UserRepository;
 import com.projet.housing.dto.HabilitationDTO;
 import com.projet.housing.dto.PermissionDTO;
 import com.projet.housing.model.Permission;
 import com.projet.housing.model.Profile;
+import com.projet.housing.model.User;
 import com.projet.housing.service.MenuService;
 import com.projet.housing.service.PermissionService;
 import com.projet.housing.service.ProfileService;
@@ -22,6 +23,8 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -101,6 +104,7 @@ public class HabilitationController {
      * @param h
      * @return
      */
+    @PreAuthorize("hasAuthority('PM_EDI_H')")
     @PostMapping("save-habilitation")
     public ResponseEntity<?> saveHabilitation(@RequestBody HabilitationDTO h) {
         System.out.println("HabilitationDTO "+h.toString());
@@ -123,26 +127,5 @@ public class HabilitationController {
             profileService.saveProfile(currentProfile);
         }
         return ResponseEntity.ok(h);
-    }
-
-    /**
-     * vérification de l'habilitation
-     * @param h
-     * @return
-     */
-    @PostMapping("/verifier-habilitation")
-    public ResponseEntity<?> checkAuthority(@RequestBody CheckAuthorityDTO h) {
-        Map<String, Object> check = new HashMap<>();
-        Optional<Profile> p = profileService.getProfile(h.getProfile());
-        Optional<Permission> pm = permissionService.getPermissionByCode(h.getPermission());
-        if(p.isPresent()){
-            if(p.get().getPermissions().contains(pm.get())){
-                check.put("authorize", true);
-                return ResponseEntity.ok(check);
-            }
-        }
-        
-        check.put("authorize", false);
-        return ResponseEntity.ok(check);
     }
 }

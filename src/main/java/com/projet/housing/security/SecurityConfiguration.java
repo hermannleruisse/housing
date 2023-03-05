@@ -6,6 +6,9 @@
 package com.projet.housing.security;
 
 import com.projet.housing.db.UserRepository;
+import com.projet.housing.exception.CustomAccessDeniedHandler;
+import com.projet.housing.exception.CustomAuthenticationEntryPoint;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -24,17 +27,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(
-    securedEnabled = true,
-    jsr250Enabled = true,
-    prePostEnabled = true
-)
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
+@EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private UserPrincipalDetailsService userPrincipalDetailsService;
     private UserRepository userRepository;
-//    private BasicAuthenticationEntryPoint authenticationEntryPoint;
+    // private BasicAuthenticationEntryPoint authenticationEntryPoint;
 
-    public SecurityConfiguration(UserPrincipalDetailsService userPrincipalDetailsService, UserRepository userRepository) {
+    public SecurityConfiguration(UserPrincipalDetailsService userPrincipalDetailsService,
+            UserRepository userRepository) {
         this.userPrincipalDetailsService = userPrincipalDetailsService;
         this.userRepository = userRepository;
     }
@@ -43,46 +43,50 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(authenticationProvider());
     }
-    
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        //cors
+        // cors
         http.cors().and()
-                //remove csrf and state in session because in jwt we do not need them
+                // remove csrf and state in session because in jwt we do not need them
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                //add jwt filter
+                // add jwt filter
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), this.userRepository))
                 .authorizeRequests()
-                
-                //configure access rules
+
+                // configure access rules
                 .antMatchers("/login").permitAll()
                 .antMatchers("/api/security/*").hasRole("ADMIN")
-                .antMatchers("/api/manager/*").hasRole("MANAGER");
-//                .antMatchers("/index.html").permitAll()
-//                .antMatchers("/profile/**").authenticated()
-//                .antMatchers("/admin/**").hasRole("ADMIN")
-//                .antMatchers("/management/**").hasAnyRole("ADMIN", "MANAGER")
-//                .antMatchers("/api/security/liste-des-utilisateurs").hasRole("ADMIN")
-//                .and()
-//                .httpBasic();
-                    
-                
+                .antMatchers("/api/manager/*").hasAnyRole("ADMIN", "MANAGER")
+                .and()
+                .exceptionHandling()
+                .accessDeniedHandler(new CustomAccessDeniedHandler())
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                ;
+        // .antMatchers("/index.html").permitAll()
+        // .antMatchers("/profile/**").authenticated()
+        // .antMatchers("/admin/**").hasRole("ADMIN")
+        // .antMatchers("/management/**").hasAnyRole("ADMIN", "MANAGER")
+        // .antMatchers("/api/security/liste-des-utilisateurs").hasRole("ADMIN")
+        // .and()
+        // .httpBasic();
+
     }
-    
+
     @Bean
-    DaoAuthenticationProvider authenticationProvider(){
+    DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
         daoAuthenticationProvider.setUserDetailsService(this.userPrincipalDetailsService);
         return daoAuthenticationProvider;
     }
-    
+
     @Bean
-    PasswordEncoder passwordEncoder(){
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
 }

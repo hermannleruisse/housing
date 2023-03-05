@@ -11,6 +11,7 @@ import org.springframework.util.ResourceUtils;
 
 import com.projet.housing.model.Member;
 
+import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -21,12 +22,12 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 @Service
 public class ReportService {
 
-    public JasperPrint getJasperPrint(List<Member> list, String resourceLocation, Map<String, Object> parameters) throws FileNotFoundException, JRException {
+    public JasperPrint getJasperPrint(JRDataSource jrDataSource, List<Member> list, String resourceLocation, Map<String, Object> parameters) throws FileNotFoundException, JRException {
         File file = ResourceUtils.getFile(resourceLocation);
         JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
-        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(list);
+        // JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(list);
 
-        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, jrDataSource);
 
         return jasperPrint;
     }

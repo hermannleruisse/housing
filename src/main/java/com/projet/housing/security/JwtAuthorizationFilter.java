@@ -10,17 +10,17 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import com.projet.housing.db.UserRepository;
+import com.projet.housing.dto.ApiError;
 import com.projet.housing.model.User;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
+import java.util.Date; 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -56,23 +56,23 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         DecodedJWT jwt = JWT.decode(token);
 
         if (jwt.getExpiresAt().before(new Date())) {
-            Map<String, Object> tokenExpire = new HashMap<>();
-            tokenExpire.put("msg", "Token expiré, veuillez-vous reconnecter !");
-            String tokenExpireJsonString = new Gson().toJson(tokenExpire);
-
+            final ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, "Token expiré, veuillez-vous reconnecter !", "Token expiré, veuillez-vous reconnecter !");
+            String forbidenJsonString = new Gson().toJson(apiError);
+            
             PrintWriter out = response.getWriter();
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
-            out.print(tokenExpireJsonString);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            out.print(forbidenJsonString);
             out.flush();
             return;
         }
 
-        // if header is present, try grab user principal from database and perform
-        // authorization
+        //if header is present, try grab user principal from database and perform authorization
         Authentication authentication = getUsernamePasswordAuthentication(request);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        // continue filter execution
+
+        //continue filter execution
         chain.doFilter(request, response);
     }
 

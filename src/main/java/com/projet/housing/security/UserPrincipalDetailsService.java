@@ -6,7 +6,12 @@
 package com.projet.housing.security;
 
 import com.projet.housing.db.UserRepository;
+import com.projet.housing.dto.ApiError;
 import com.projet.housing.model.User;
+
+import net.bytebuddy.implementation.bytecode.Throw;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,6 +32,9 @@ public class UserPrincipalDetailsService implements UserDetailsService{
     @Override
     public UserDetails loadUserByUsername(String string) throws UsernameNotFoundException {
         User u = this.userRepository.findByUsername(string);
+        if(u == null){
+            throw new UsernameNotFoundException("Login ou mot de passe incorrect !");
+        }
         UserPrincipal userPrincipal = new UserPrincipal(u);
         return userPrincipal;
     }
